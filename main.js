@@ -38,7 +38,7 @@ function drawEl(){
     cam.processInput(handler)
     scemoShader.setMatrixUniform("uViewMatrix",cam.getViewMatrix())
     oof.calcSceneDraw(scemoShader)
-    //window.requestAnimationFrame(drawEl)
+    window.requestAnimationFrame(drawEl)
 }
 
 cam = setup(scemoShader)
