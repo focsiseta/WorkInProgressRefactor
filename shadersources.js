@@ -76,7 +76,7 @@ const fsShaderBase  = `
         //Corrected and interpolated normal
         varying vec3 vNormal;
         //Interpolated tex coordinates
-         varying highp vec2 vTexCoord;
+         varying highp vec2 vTextureCoord;
         
         
         //Camera position
@@ -97,13 +97,6 @@ const fsShaderBase  = `
             vec3 direction;
         };
         
-        /*
-        int N_MAX_LIGHT = 1024;
-        #define N_MAX_LIGHT 1024
-        I can't get them to work gonna try later 
-        TODO
-        */
-        
         uniform sampler2D uSampler; // Texture
         
         //33
@@ -113,10 +106,10 @@ const fsShaderBase  = `
         
         vec3 CalcDirectionalLight(DirectionalLight light,vec3 cameraPos,vec3 normal){
             vec3 normalizedNormal = normalize(normal);
-            vec3 ambientColor = (light.color * light.ambientInt) * uMatAmbientColor;
-            vec3 diffuseColor = (light.color * light.diffuseInt) * uMatDiffuseColor * max(0.0,dot(normalizedNormal,light.direction));
+            vec3 ambientColor = (light.color * light.ambientInt) * texture2D(uSampler,vTextureCoord).xyz;
+            vec3 diffuseColor = (light.color * light.diffuseInt) * texture2D(uSampler,vTextureCoord).xyz * max(0.0,dot(normalizedNormal,light.direction));
             vec3 H = normalize(-light.direction + normalize(cameraPos));
-            vec3 specularColor = pow(max(0.5,dot(H,normalizedNormal)), 30.)  * uMatSpecularColor * light.color;
+            vec3 specularColor = pow(max(0.5,dot(H,normalizedNormal)), 30.)  * texture2D(uSampler,vTextureCoord).xyz * light.color;
             light.ambient = ambientColor;
             light.diffuse = diffuseColor;
             light.specular = specularColor;
@@ -132,7 +125,7 @@ const fsShaderBase  = `
                 finalColor += CalcDirectionalLight(sun[i],uEyePosition,vNormal);
 
             }
-            gl_FragColor = texture2D(uSampler,vTexCoord).xyz;
+            gl_FragColor = vec4(finalColor,1.0);
         
         }
         

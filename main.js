@@ -1,5 +1,5 @@
 const handler = new Input()
-const scemoShader = new Shader(gl,vsShaderBaseline,scemoFSSource)
+const scemoShader = new Shader(gl,vsShaderBaseline,fsShaderBase)
 const shapeCube = new Element(
     cube.vertices[0].values,
     cube.vertices[1].values,
@@ -22,6 +22,10 @@ function createScene(shader){
     shader.loadTexture("texture/textureBox.png")
     shader.loadElement(shapeCube)
     shader.loadElement(shapeCrate)
+    var directional = new DirectionalLight("Test",0.3,0.3,[-1.0,-1.0,0],[1,1,1])
+
+    DirectionalLight.bindLights(shader)
+    DirectionalLight.loadLights(shader)
     var node = new sceneNode(new Drawable(Transformations.gimbalT.XYZ,shapeCrate))
     for(var i = 0;i < 5;i++){
         var d = new Drawable(Transformations.gimbalT.XYZ,shapeCrate)
@@ -37,6 +41,7 @@ function drawEl(){
     //oof.element.lRotateAlpha(0.001)
     cam.processInput(handler)
     scemoShader.setMatrixUniform("uViewMatrix",cam.getViewMatrix())
+    scemoShader.setVectorUniform('uEyePosition',cam.getCameraPosition())
     oof.calcSceneDraw(scemoShader)
     window.requestAnimationFrame(drawEl)
 }
