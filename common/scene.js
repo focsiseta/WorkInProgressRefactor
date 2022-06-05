@@ -6,6 +6,7 @@ class sceneNode{
     addSon(element){
         var newTree = new sceneNode(element)
         this.branches.push(newTree)
+        return newTree
     }
     addSubTree(tree){
         this.branches.push(tree)

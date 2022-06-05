@@ -4,8 +4,9 @@ class Element {
         LIGHT : 0,
         SHAPE : 1,
 }
+
     constructor(
-                vertexArray,normalArray,indexArray,texCoordArray,elementType = Element.ElementType.SHAPE,drawType = "TRIANGLES",) {
+                id,vertexArray,normalArray,indexArray,texCoordArray,elementType = Element.ElementType.SHAPE,drawType = "TRIANGLES",) {
 
         this.vertices = new Float32Array(vertexArray)
         this.normals = new Float32Array(normalArray)
@@ -13,6 +14,7 @@ class Element {
         this.texCoords = new Float32Array(texCoordArray)
         this.elementType = elementType
         this.drawType = drawType
+        this.id = id
     }
     loadVertices(vertexArray){
         this.vertices = new Float32Array(vertexArray)

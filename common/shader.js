@@ -1,4 +1,5 @@
 class Shader {
+    static id_last_draw = ""
     constructor(glContext, vsSource, fsSource) {
         //DEBUGGING
         this.vsLog = ""
@@ -37,6 +38,9 @@ class Shader {
             this.bindUniform(element)
         })
         this.useProgram()
+        this.gl.enableVertexAttribArray(this["aPosition"])
+        this.gl.enableVertexAttribArray(this["aNormal"])
+        this.gl.enableVertexAttribArray(this["aTextureCoord"])
     }
     contextSetup(){
         this.gl.enable(gl.CULL_FACE)
@@ -46,37 +50,43 @@ class Shader {
     }
     drawDrawable(toDraw){
         var context = this.gl
+        if(!(Shader.id_last_draw === toDraw.shape.id)) {
+            console.log("changing shape...")
+            //context.bindBuffer(context.ARRAY_BUFFER,null)
+            //context.bindBuffer(context.ELEMENT_ARRAY_BUFFER,null)
 
-        context.bindBuffer(context.ARRAY_BUFFER,toDraw.shape.vBuffer)
-        context.enableVertexAttribArray(this["aPosition"])
-        context.vertexAttribPointer(this["aPosition"],3,context.FLOAT,false,0,0)
+            context.bindBuffer(context.ARRAY_BUFFER, toDraw.shape.vBuffer)
+            context.vertexAttribPointer(this["aPosition"],3,context.FLOAT,false,0,0)
 
-        context.bindBuffer(context.ARRAY_BUFFER,toDraw.shape.nBuffer)
-        context.enableVertexAttribArray(this["aNormal"])
-        context.vertexAttribPointer(this["aNormal"],3,context.FLOAT,false,0,0)
+            context.bindBuffer(context.ARRAY_BUFFER, toDraw.shape.nBuffer)
+            //context.enableVertexAttribArray(this["aNormal"])
+            context.vertexAttribPointer(this["aNormal"],3,context.FLOAT,false,0,0)
 
-        context.bindBuffer(context.ARRAY_BUFFER,toDraw.shape.texCoordBuffer)
-        context.enableVertexAttribArray(this["aTextureCoord"])
-        context.vertexAttribPointer(this["aTextureCoord"],2,context.FLOAT,false,0,0)
+            context.bindBuffer(context.ARRAY_BUFFER, toDraw.shape.texCoordBuffer)
+            //context.enableVertexAttribArray(this["aTextureCoord"])
+            context.vertexAttribPointer(this["aTextureCoord"],2,context.FLOAT,false,0,0)
+            context.bindBuffer(context.ELEMENT_ARRAY_BUFFER,toDraw.shape.iBuffer)
+            Shader.id_last_draw = toDraw.shape.id
+        }
 
         //Tell opengl which texture to use
+        /*
         context.activeTexture(context.TEXTURE0)
         context.bindTexture(context.TEXTURE_2D,this.textureArray[0])
         this.setUniform1Int("uSampler",0)
 
+         */
 
-
-        context.bindBuffer(context.ELEMENT_ARRAY_BUFFER,toDraw.shape.iBuffer)
         this.setMatrixUniform("uM",toDraw.getFrame())
         context.uniformMatrix4fv(this['uInvTransGeoMatrix'],false,toDraw.getInverseTranspose())
 
 
         context.drawElements(context[toDraw.shape.drawType],toDraw.shape.indices.length,context.UNSIGNED_SHORT,0)
+/*
         context.disableVertexAttribArray(this['aPosition'])
         context.disableVertexAttribArray(this['aNormal'])
         context.disableVertexAttribArray(this['aTextureCoord'])
-        context.bindBuffer(context.ARRAY_BUFFER,null)
-        context.bindBuffer(context.ELEMENT_ARRAY_BUFFER,null)
+*/
 
     }
     loadElement(toLoad){
@@ -91,16 +101,16 @@ class Shader {
         context.bindBuffer(context.ARRAY_BUFFER,toLoad.nBuffer)
         context.bufferData(context.ARRAY_BUFFER,toLoad.normals,context.STATIC_DRAW)
         context.bindBuffer(context.ARRAY_BUFFER,null)
-        //Indices
-        toLoad.iBuffer = context.createBuffer()
-        context.bindBuffer(context.ELEMENT_ARRAY_BUFFER,toLoad.iBuffer)
-        context.bufferData(context.ELEMENT_ARRAY_BUFFER,toLoad.indices,context.STATIC_DRAW)
-        context.bindBuffer(context.ELEMENT_ARRAY_BUFFER,null)
         //TexCoords
         toLoad.texCoordBuffer = context.createBuffer()
         context.bindBuffer(context.ARRAY_BUFFER,toLoad.texCoordBuffer)
         context.bufferData(context.ARRAY_BUFFER,toLoad.texCoords,context.STATIC_DRAW)
         context.bindBuffer(context.ARRAY_BUFFER,null)
+        //Indices
+        toLoad.iBuffer = context.createBuffer()
+        context.bindBuffer(context.ELEMENT_ARRAY_BUFFER,toLoad.iBuffer)
+        context.bufferData(context.ELEMENT_ARRAY_BUFFER,toLoad.indices,context.STATIC_DRAW)
+        context.bindBuffer(context.ELEMENT_ARRAY_BUFFER,null)
     }
     loadTexture(path){
         var context = this.gl
@@ -125,6 +135,9 @@ class Shader {
             }
         }
         image.src = path
+        context.activeTexture(context.TEXTURE0)
+        context.bindTexture(context.TEXTURE_2D,this.textureArray[0])
+        this.setUniform1Int("uSampler",0)
     }
 
     getContext(){
