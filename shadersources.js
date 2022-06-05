@@ -116,7 +116,7 @@ const fsShaderBase  = `
             return vec3(light.ambient + light.specular + light.diffuse);
         }
         void main(void){
-            vec3 finalColor = vec3(0.0,0.0,0.0);
+            vec3 finalColor = texture2D(uSampler,vTextureCoord).xyz;
             int counter = int(N_DIRLIGHTS);
             for(int i = 0; i < 50; i++){
                 if(i > counter){

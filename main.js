@@ -24,20 +24,21 @@ function createScene(shader){
     shader.loadElement(shapeCrate)
     var directional = new DirectionalLight("Test",0.3,0.3,[-1.0,-1.0,0],[1,1,1])
 
-    DirectionalLight.bindLights(shader)
-    DirectionalLight.loadLights(shader)
+    //DirectionalLight.bindLights(shader)
+    //DirectionalLight.loadLights(shader)
     var node = new sceneNode(new Drawable(Transformations.gimbalT.XYZ,shapeCrate))
-    for(var i = 0;i < 5;i++){
+    for(var i = 0;i < 30;i++){
         var d = new Drawable(Transformations.gimbalT.XYZ,shapeCrate)
         d.translate([0,0,-i*5])
         node.addSon(d)
     }
+    node.drawab.lRotateAlpha(80)
 
     return node
 }
 
 function drawEl(){
-    //oof.element.lRotateBeta(0.01)
+    //oof.drawab.lRotateBeta(0.01)
     //oof.element.lRotateAlpha(0.001)
     cam.processInput(handler)
     scemoShader.setMatrixUniform("uViewMatrix",cam.getViewMatrix())

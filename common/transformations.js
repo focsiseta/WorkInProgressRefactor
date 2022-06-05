@@ -10,7 +10,7 @@ class Transformations {
 
     constructor(gimbalType = Transformations.gimbalT.XYZ){
         //rotation in radians of local x,y,z axis
-
+        this.dirty = false;
         this.alpha = 0
         this.beta = 0
         this.gamma = 0
@@ -24,15 +24,34 @@ class Transformations {
         this.rotationMatrix = glMatrix.mat4.create()
         this.scaleMatrix = glMatrix.mat4.create()
         this.translationMatrix = glMatrix.mat4.create()
+        //Optimization
+        this.frame = glMatrix.mat4.create()
+        this.inverseTransposeMatrix = glMatrix.mat4.create()
+        this.transformationMatrix = glMatrix.mat4.create()
+
+
         //Father frame
         this.fMatrix = glMatrix.mat4.create()
 
     }
+    update(){
+        if(this.dirty){
+            console.log("Doing math...")
+            this.dirty = false
+            //Transformation matrix
+            glMatrix.mat4.mul(this.transformationMatrix,this.translationMatrix,this.scaleMatrix)
+            //(T * S) = T * S * R
+            glMatrix.mat4.mul(this.transformationMatrix,this.transformationMatrix,this.rotationMatrix)
+            /******** Inverse Transpose **************/
+            glMatrix.mat4.transpose(this.inverseTransposeMatrix,glMatrix.mat4.invert(this.inverseTransposeMatrix,this.transformationMatrix))
+            /******** object frame **************/
+            glMatrix.mat4.mul(this.frame,this.fMatrix,this.transformationMatrix)
+        }
+    }
     //this method is for keeping normal consistency in the shaders. If we have to draw an object with normals, we also need the inverse transposed transf matrix
     getInverseTranspose(){
-        let tmp = glMatrix.mat4.create()
-        glMatrix.mat4.transpose(tmp,glMatrix.mat4.invert(tmp,this.getTransformation()))
-        return tmp
+        this.update()
+        return this.inverseTransposeMatrix
     }
     rotationCalc(){
 
@@ -84,56 +103,61 @@ class Transformations {
     addGamma(gamma){ this.gamma = (this.gamma + gamma) % (Math.PI*2) }
 
     lRotateAlpha(alpha){
+        this.dirty = true
         this.addAlpha(alpha)
         this.rotationCalc()
     }
     lRotateBeta(beta){
+        this.dirty = true
         this.addBeta(beta)
         this.rotationCalc()
     }
     lRotateGamma(gamma){
+        this.dirty = true
         this.addGamma(gamma)
         this.rotationCalc()
     }
 
     //wRotate* are rotations methods that can be applied to rotate around "real" axis (not relative ones)
     wRotateX(angle){
+        this.dirty = true
         glMatrix.mat4.rotateX(this.rotationMatrix,this.rotationMatrix,angle)
     }
     wRotateY(angle){
+        this.dirty = true
         glMatrix.mat4.rotateY(this.rotationMatrix,this.rotationMatrix,angle)
     }
     wRotateZ(angle){
+        this.dirty = true
         glMatrix.mat4.rotateZ(this.rotationMatrix,this.rotationMatrix,angle)
     }
     translate(translationVector){
+        this.dirty = true
         glMatrix.mat4.translate(this.translationMatrix,this.translationMatrix,translationVector)
     }
     scale(scaleVector){
+        this.dirty = true
         glMatrix.mat4.scale(this.scaleMatrix,this.scaleMatrix,scaleVector)
     }
     getFrame(){
-        var tmp = glMatrix.mat4.create()
-        //TransScalRot (TSR) Matrix composition -> father matrix * son matrix * vertex
-        // We express points in father's perspective so we can have global coordinates
-        // as father matrix * son matrix * vertex and that's basically it
-
-        // tmp = T * S
-        glMatrix.mat4.mul(tmp,this.translationMatrix,this.scaleMatrix)
-        //(T * S) = T * S * R
-        glMatrix.mat4.mul(tmp,tmp,this.rotationMatrix)
-        glMatrix.mat4.mul(tmp,this.fMatrix,tmp)
-        return tmp
+        this.update()
+        return this.frame
     }
     getTransformation(){
-        var tmp = glMatrix.mat4.create()
-        glMatrix.mat4.mul(tmp,this.translationMatrix,this.scaleMatrix)
-        //(T * S) = T * S * R
-        glMatrix.mat4.mul(tmp,tmp,this.rotationMatrix)
-        return tmp
+        this.update()
+        return this.transformationMatrix
     }
     setFatherFrame(frame){
+        this.dirty = true
         glMatrix.mat4.copy(this.fMatrix,frame)
+        this.update()
     }
+    setDirty(boolean){
+        this.dirty = boolean
+    }
+    getDirty(){
+        return this.dirty
+    }
+
 
 }

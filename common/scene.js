@@ -1,6 +1,6 @@
 class sceneNode{
-    constructor(element = null) {
-        this.element = element
+    constructor(drawab = null) {
+        this.drawab = drawab
         this.branches = []
     }
     addSon(element){
@@ -14,52 +14,57 @@ class sceneNode{
         this.element = element
     }
     calcScene(){
-        sceneNode.recCalcScene(this,identity())
+        sceneNode.recCalcScene(this,identity(),this.drawab.getDirty())
     }
-    static recCalcScene(sNode,acc){
-        if(sNode.element == null){
+    static recCalcScene(sNode,acc,dirty){
+        if(sNode.drawab == null){
             sNode.branches.forEach((branch)=>{
-                sceneNode.recCalcScene(branch,acc)
+                sceneNode.recCalcScene(branch,acc,dirty)
             })
             return
         }
-        sNode.element.setFatherFrame(acc)
+
+        if(dirty){
+            sNode.drawab.setFatherFrame(acc)
+        }
         sNode.branches.forEach((branch) =>{
-            sceneNode.recCalcScene(branch,sNode.element.getFrame())
+            sceneNode.recCalcScene(branch,sNode.drawab.getFrame(),dirty)
         })
     }
     calcSceneDraw(shader){ //useful when you want perpetual movement
-        sceneNode.recCalcSceneDraw(this,glMatrix.mat4.create(),shader)
+        sceneNode.recCalcSceneDraw(this,glMatrix.mat4.create(),shader,this.drawab.getDirty())
     }
-    static recCalcSceneDraw(sNode,acc,shader){
-        if(sNode.element == null){
+    static recCalcSceneDraw(sNode,acc,shader,dirty){
+        if(sNode.drawab == null){
             sNode.branches.forEach((branch)=>{
-                sceneNode.recCalcSceneDraw(branch,acc,shader)
+                sceneNode.recCalcSceneDraw(branch,acc,shader,dirty)
             })
             return
         }
-        sNode.element.setFatherFrame(acc)
-        if(sNode.element.elementType !== Element.ElementType.LIGHT)
-            shader.drawDrawable(sNode.element)
+        if(dirty){
+            sNode.drawab.setFatherFrame(acc)
+        }
+        if(sNode.drawab.elementType !== Element.ElementType.LIGHT)
+            shader.drawDrawable(sNode.drawab)
 
 
         sNode.branches.forEach((branch) =>{
-            sceneNode.recCalcSceneDraw(branch,sNode.element.getFrame(),shader)
+            sceneNode.recCalcSceneDraw(branch,sNode.drawab.getFrame(),shader,dirty)
         })
     }
     drawScene(shader){
         sceneNode.recDrawScene(this,shader)
     }
     static recDrawScene(sNode,shader){
-        if(sNode.element == null){
+        if(sNode.drawab == null){
             sNode.branches.forEach((branch)=>{
                 sceneNode.recDrawScene(branch,shader)
             })
             return
         }
 
-        if(sNode.element.elementType !== Element.ElementType.LIGHT)
-            shader.drawDrawable(sNode.element)
+        if(sNode.drawab.elementType !== Element.ElementType.LIGHT)
+            shader.drawDrawable(sNode.drawab)
 
         sNode.branches.forEach((branch) =>{
             sceneNode.recDrawScene(branch,shader)
