@@ -79,14 +79,7 @@ class Shader {
 
         this.setMatrixUniform("uM",toDraw.getFrame())
         context.uniformMatrix4fv(this['uInvTransGeoMatrix'],false,toDraw.getInverseTranspose())
-
-
         context.drawElements(context[toDraw.shape.drawType],toDraw.shape.indices.length,context.UNSIGNED_SHORT,0)
-/*
-        context.disableVertexAttribArray(this['aPosition'])
-        context.disableVertexAttribArray(this['aNormal'])
-        context.disableVertexAttribArray(this['aTextureCoord'])
-*/
 
     }
     loadElement(toLoad){
@@ -135,6 +128,7 @@ class Shader {
             }
         }
         image.src = path
+        //To remove
         context.activeTexture(context.TEXTURE0)
         context.bindTexture(context.TEXTURE_2D,this.textureArray[0])
         this.setUniform1Int("uSampler",0)
