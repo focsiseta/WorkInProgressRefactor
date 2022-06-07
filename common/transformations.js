@@ -36,7 +36,7 @@ class Transformations {
     }
     update(){
         if(this.dirty){
-            console.log("Doing math...")
+            //console.log("Doing math...")
             this.dirty = false
             //Transformation matrix
             glMatrix.mat4.mul(this.transformationMatrix,this.translationMatrix,this.scaleMatrix)

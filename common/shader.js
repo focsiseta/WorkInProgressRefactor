@@ -9,11 +9,10 @@ class Shader {
         this.vsSource = vsSource
         this.fsSource = fsSource
         this.gl = glContext
-
+        this.textureArray = []
         this.program = this.gl.createProgram()
         this.vertexShader = this.gl.createShader(gl.VERTEX_SHADER)
         this.fragmentShader = this.gl.createShader(gl.FRAGMENT_SHADER)
-        this.textureArray = []
         this.gl.shaderSource(this.vertexShader, this.vsSource)
         this.gl.compileShader(this.vertexShader)
         //DEBUGGING
@@ -38,6 +37,7 @@ class Shader {
             this.bindUniform(element)
         })
         this.useProgram()
+        //Todo automate
         this.gl.enableVertexAttribArray(this["aPosition"])
         this.gl.enableVertexAttribArray(this["aNormal"])
         this.gl.enableVertexAttribArray(this["aTextureCoord"])
@@ -51,19 +51,13 @@ class Shader {
     drawDrawable(toDraw){
         var context = this.gl
         if(!(Shader.id_last_draw === toDraw.shape.id)) {
-            console.log("changing shape...")
-            //context.bindBuffer(context.ARRAY_BUFFER,null)
-            //context.bindBuffer(context.ELEMENT_ARRAY_BUFFER,null)
-
             context.bindBuffer(context.ARRAY_BUFFER, toDraw.shape.vBuffer)
             context.vertexAttribPointer(this["aPosition"],3,context.FLOAT,false,0,0)
 
             context.bindBuffer(context.ARRAY_BUFFER, toDraw.shape.nBuffer)
-            //context.enableVertexAttribArray(this["aNormal"])
             context.vertexAttribPointer(this["aNormal"],3,context.FLOAT,false,0,0)
 
             context.bindBuffer(context.ARRAY_BUFFER, toDraw.shape.texCoordBuffer)
-            //context.enableVertexAttribArray(this["aTextureCoord"])
             context.vertexAttribPointer(this["aTextureCoord"],2,context.FLOAT,false,0,0)
             context.bindBuffer(context.ELEMENT_ARRAY_BUFFER,toDraw.shape.iBuffer)
             Shader.id_last_draw = toDraw.shape.id

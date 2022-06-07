@@ -83,40 +83,42 @@ const fsShaderBase  = `
         uniform vec3 uEyePosition;
         
         //How many directional lights
-        uniform float N_DIRLIGHTS;
+        uniform int N_DIRLIGHTS;
         //We can have an offset for deciding which light is going to be rendered
         
         struct DirectionalLight{
+            //Uniform
             float diffuseInt;
             float ambientInt;
             vec3 color;
-            
-            vec3 specular;
-            vec3 ambient;
-            vec3 diffuse;
+            //Not uniform
+            vec4 specular;
+            vec4 ambient;
+            vec4 diffuse;
             vec3 direction;
         };
         
         uniform sampler2D uSampler; // Texture
+       // uniform sampler2D uNormalMap; //Height map
         
         //33
         //Luke skywalker
         
         uniform DirectionalLight sun[10];
         
-        vec3 CalcDirectionalLight(DirectionalLight light,vec3 cameraPos,vec3 normal){
+        vec4 CalcDirectionalLight(DirectionalLight light,vec3 cameraPos,vec3 normal){
             vec3 normalizedNormal = normalize(normal);
-            vec3 ambientColor = (light.color * light.ambientInt) * texture2D(uSampler,vTextureCoord).xyz;
-            vec3 diffuseColor = (light.color * light.diffuseInt) * texture2D(uSampler,vTextureCoord).xyz * max(0.0,dot(normalizedNormal,light.direction));
-            vec3 H = normalize(normalize(-light.direction) + normalize(cameraPos));
-            vec3 specularColor = pow(max(0.5,dot(H,normalizedNormal)), 30.)  * texture2D(uSampler,vTextureCoord).xyz * light.color;
+            vec4 ambientColor = vec4(light.color * light.ambientInt,1.0) * texture2D(uSampler,vTextureCoord);
+            vec4 diffuseColor = vec4(light.color * light.diffuseInt,1.0) * texture2D(uSampler,vTextureCoord) * max(0.0,dot(normalizedNormal,light.direction));
+            vec3 H = normalize(normalize(light.direction) + normalize(cameraPos));
+            vec4 specularColor = pow(max(0.5,dot(H,normalizedNormal)), 25.)  * texture2D(uSampler,vTextureCoord) * vec4(light.color,1.0);
             light.ambient = ambientColor;
             light.diffuse = diffuseColor;
             light.specular = specularColor;
-            return vec3(light.ambient + light.specular + light.diffuse);
+            return light.ambient + light.specular + light.diffuse;
         }
         void main(void){
-            vec3 finalColor = texture2D(uSampler,vTextureCoord).xyz;
+            vec4 finalColor = texture2D(uSampler,vTextureCoord);
             int counter = int(N_DIRLIGHTS);
             for(int i = 0; i < 50; i++){
                 if(i > counter){
@@ -125,7 +127,7 @@ const fsShaderBase  = `
                 finalColor += CalcDirectionalLight(sun[i],uEyePosition,vNormal);
 
             }
-            gl_FragColor = vec4(finalColor,1.0);
+            gl_FragColor = finalColor;
         
         }
         

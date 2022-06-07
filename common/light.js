@@ -56,7 +56,7 @@ class DirectionalLight extends Light{
                 vec3 direction; //uniform
             }
         */
-        shader.setUniform1Float("N_DIRLIGHTS",DirectionalLight.counter)
+        shader.setUniform1Int("N_DIRLIGHTS",DirectionalLight.counter)
         for(let i = 0;i < DirectionalLight.counter;i++){
             shader.setUniform1Float("sun["+i+"].diffuseInt",DirectionalLight.lightKeeper[i].getDiffuseInt())
             shader.setUniform1Float("sun["+i+"].ambientInt",DirectionalLight.lightKeeper[i].getAmbientInt())
