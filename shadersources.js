@@ -48,17 +48,17 @@ const vsShaderBaseline  = `
         uniform mat4 uProjMatrix;
         
         //Position in world space
-        varying vec3 vPositionW;
+        varying vec3 vPositionC;
         //exiting normal (which needs to be corrected by uInvTransGeoMatrix)
         varying vec3 vNormal;
         //interpol. texture
         varying highp vec2 vTextureCoord;
         
         void main(void){
-            //Point in world space just in case we need it
-            vPositionW = (uViewMatrix * uM * vec4(aPosition,1.0)).xyz;
-            
-            gl_Position = uProjMatrix * vec4(vPositionW,1.0);
+            //Point in camera space just in case we need it
+            vPositionC = ( uM * vec4(aPosition,1.0)).xyz;
+           
+            gl_Position = uProjMatrix * uViewMatrix * vec4(vPositionC,1.0);
             
             //Sending correct normal to fragment shader
             vNormal = (uInvTransGeoMatrix * vec4(aNormal,1.0)).xyz;
@@ -69,8 +69,8 @@ const vsShaderBaseline  = `
 const fsShaderBase  = `
         precision highp float;
         
-        //Position in world space on the object right now (interpolated)
-        varying vec3 vPositionW;
+        //Position in camera space on the object right now (interpolated)
+        varying vec3 vPositionC;
         
         //exiting normal (which needs to be corrected by uInvTransGeoMatrix)
         //Corrected and interpolated normal
@@ -111,7 +111,7 @@ const fsShaderBase  = `
             vec4 ambientColor = vec4(light.color * light.ambientInt,1.0) * texture2D(uSampler,vTextureCoord);
             vec4 diffuseColor = vec4(light.color * light.diffuseInt,1.0) * texture2D(uSampler,vTextureCoord) * max(0.0,dot(normalizedNormal,light.direction));
             vec3 H = normalize(normalize(light.direction) + normalize(cameraPos));
-            vec4 specularColor = pow(max(0.5,dot(H,normalizedNormal)), 25.)  * texture2D(uSampler,vTextureCoord) * vec4(light.color,1.0);
+            vec4 specularColor = pow(max(0.0,dot(H,normalizedNormal)), 25.)  * texture2D(uSampler,vTextureCoord) * vec4(light.color,1.0);
             light.ambient = ambientColor;
             light.diffuse = diffuseColor;
             light.specular = specularColor;
