@@ -33,9 +33,32 @@ class Element {
 
 class Drawable extends Transformations{
     constructor(gimbalType = Transformations.gimbalT.XYZ,
-                shape = null) {
+                shape = null,material = null) {
         super(gimbalType)
         this.shape = shape
+        this.material = material
     }
 }
 
+
+function LazyUVMappingMatrixSetup(element,width,height){
+    var shortCut = Math.floor(element.vertices.length / 2)
+    var isEven = (element.vertices.length % 2) === 0
+    var x_step = 1/shortCut
+    var y_step = isEven ? x_step : 1/(element.vertices.length - shortCut)
+
+    return [x_step,y_step]
+
+}
+// I was high
+function LazyUVMappingMatrix(element,width,height){
+
+    var [x_step,y_step] = LazyUVMappingMatrixSetup(element,width,height)
+    var texCoordValues = []
+    for (var i = 0, j = 0; i <= 1 && j <= 1;i += x_step,j += y_step){
+            texCoordValues.push(i)
+            texCoordValues.push(j)
+    }
+    return texCoordValues
+
+}

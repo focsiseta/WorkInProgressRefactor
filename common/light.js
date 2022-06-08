@@ -1,5 +1,6 @@
-class Light{
+class Light extends Transformations{
     constructor(type = "Local",diffuseInt,ambientInt,color) {
+        super(Transformations.gimbalT.XYZ)
         this.type = type
         this.diffuseIntensity = diffuseInt
         this.ambientIntensity = ambientInt

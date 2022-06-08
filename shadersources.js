@@ -47,6 +47,9 @@ const vsShaderBaseline  = `
         uniform mat4 uViewMatrix;
         uniform mat4 uProjMatrix;
         
+        uniform sampler2D uDiffuseColor; // Texture
+        uniform sampler2D uNormalMap; //Height map
+
         //Position in world space
         varying vec3 vPositionC;
         //exiting normal (which needs to be corrected by uInvTransGeoMatrix)
@@ -60,7 +63,7 @@ const vsShaderBaseline  = `
            
             gl_Position = uProjMatrix * uViewMatrix * vec4(vPositionC,1.0);
             
-            //Sending correct normal to fragment shader
+            //Correcting normal before having it interpolated for the fragment
             vNormal = (uInvTransGeoMatrix * vec4(aNormal,1.0)).xyz;
             vTextureCoord = aTextureCoord;
             
@@ -98,8 +101,8 @@ const fsShaderBase  = `
             vec3 direction;
         };
         
-        uniform sampler2D uSampler; // Texture
-       // uniform sampler2D uNormalMap; //Height map
+        uniform sampler2D uDiffuseColor; // Texture
+        uniform sampler2D uNormalMap; //Height map
         
         //33
         //Luke skywalker
@@ -108,22 +111,24 @@ const fsShaderBase  = `
         
         vec4 CalcDirectionalLight(DirectionalLight light,vec3 cameraPos,vec3 normal){
             vec3 normalizedNormal = normalize(normal);
-            vec4 ambientColor = vec4(light.color * light.ambientInt,1.0) * texture2D(uSampler,vTextureCoord);
-            vec4 diffuseColor = vec4(light.color * light.diffuseInt,1.0) * texture2D(uSampler,vTextureCoord) * max(0.0,dot(normalizedNormal,light.direction));
-            vec3 H = normalize(normalize(light.direction) + normalize(cameraPos));
-            vec4 specularColor = pow(max(0.0,dot(H,normalizedNormal)), 25.)  * texture2D(uSampler,vTextureCoord) * vec4(light.color,1.0);
+            vec4 ambientColor = vec4(light.color * light.ambientInt,1.0) * texture2D(uDiffuseColor,vTextureCoord);
+            vec4 diffuseColor = vec4(light.color * light.diffuseInt,1.0) * texture2D(uDiffuseColor,vTextureCoord) * max(0.0,dot(normalizedNormal,-light.direction));
+            //Half way vector
+            vec3 H = normalize(normalize(-light.direction) + normalize(cameraPos));
+            vec4 specularColor = pow(max(0.0,dot(H,normalizedNormal)), 64.)  * texture2D(uDiffuseColor,vTextureCoord) * vec4(light.color,1.0);
             light.ambient = ambientColor;
             light.diffuse = diffuseColor;
             light.specular = specularColor;
             return light.ambient + light.specular + light.diffuse;
         }
         void main(void){
-            vec4 finalColor = texture2D(uSampler,vTextureCoord);
+            vec4 finalColor = texture2D(uDiffuseColor,vTextureCoord);
             int counter = int(N_DIRLIGHTS);
             for(int i = 0; i < 50; i++){
                 if(i > counter){
                     break;
                 }
+                vec3 normal = texture2D(uNormalMap,vTextureCoord).rgb;
                 finalColor += CalcDirectionalLight(sun[i],uEyePosition,vNormal);
 
             }

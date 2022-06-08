@@ -1,5 +1,6 @@
 class Shader {
     static id_last_draw = ""
+    static id_last_material = ""
     constructor(glContext, vsSource, fsSource) {
         //DEBUGGING
         this.vsLog = ""
@@ -45,11 +46,15 @@ class Shader {
     contextSetup(){
         this.gl.enable(gl.CULL_FACE)
         this.gl.enable(gl.DEPTH_TEST)
-        this.gl.clearColor(0.3,0.8,0.8,0.8)
+        this.gl.clearColor(0.0,0.0,0.0,0.8)
         this.gl.clear(gl.COLOR_BUFFER_BIT,gl.DEPTH_BUFFER_BIT)
     }
     drawDrawable(toDraw){
         var context = this.gl
+        if(!(Shader.id_last_material === toDraw.material.getId())){
+            toDraw.material.activateMaterial(this)
+            Shader.id_last_material = toDraw.material.getId()
+        }
         if(!(Shader.id_last_draw === toDraw.shape.id)) {
             context.bindBuffer(context.ARRAY_BUFFER, toDraw.shape.vBuffer)
             context.vertexAttribPointer(this["aPosition"],3,context.FLOAT,false,0,0)
@@ -186,6 +191,4 @@ class Shader {
         }
         this.gl.uniform1i(this[uniformName],data)
     }
-
-
 }

@@ -173,4 +173,3 @@ function generateTexCoords(howMany){
     }
     return tmp
 }
-
