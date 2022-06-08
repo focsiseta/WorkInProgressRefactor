@@ -68,14 +68,6 @@ class Shader {
             Shader.id_last_draw = toDraw.shape.id
         }
 
-        //Tell opengl which texture to use
-        /*
-        context.activeTexture(context.TEXTURE0)
-        context.bindTexture(context.TEXTURE_2D,this.textureArray[0])
-        this.setUniform1Int("uSampler",0)
-
-         */
-
         this.setMatrixUniform("uM",toDraw.getFrame())
         context.uniformMatrix4fv(this['uInvTransGeoMatrix'],false,toDraw.getInverseTranspose())
         context.drawElements(context[toDraw.shape.drawType],toDraw.shape.indices.length,context.UNSIGNED_SHORT,0)
@@ -103,7 +95,7 @@ class Shader {
         context.bindBuffer(context.ELEMENT_ARRAY_BUFFER,toLoad.iBuffer)
         context.bufferData(context.ELEMENT_ARRAY_BUFFER,toLoad.indices,context.STATIC_DRAW)
         context.bindBuffer(context.ELEMENT_ARRAY_BUFFER,null)
-    }
+    }/*
     loadTexture(path){
         var context = this.gl
         var texture = context.createTexture()
@@ -131,7 +123,7 @@ class Shader {
         context.activeTexture(context.TEXTURE0)
         context.bindTexture(context.TEXTURE_2D,this.textureArray[0])
         this.setUniform1Int("uSampler",0)
-    }
+    }*/
 
     getContext(){
         return this.gl
