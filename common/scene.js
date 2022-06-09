@@ -1,7 +1,40 @@
 class sceneNode{
+
     constructor(drawab = null) {
         this.drawab = drawab
         this.branches = []
+        this.sortedDrawables = []
+    }
+    static drawOrder(node){
+        /*
+        *trees = A series of node that when asked to render will just be rendered as one
+        *
+        * This code for now will be simple but the idea is that as trees get constructed a list where things will already
+        * be sorted
+        * I need to find a way to keep or update the list when inserting, or I can just call this function once because for now
+        * nothing gets added in the scene in real time
+        *
+        * High order policy, I'll write some just to have default choices
+        *
+        * First same material and same element
+        * Second same material and different element
+        * Third different material and different
+        * */
+
+        var ofcHashmap = new Map()
+        if(node.element !== null && node.material !== null ){
+            //I'm not sure if this control is really needed
+            ofcHashmap.set(node.drawab.element.getId(),node.drawab.material.getId())
+        }
+        node.forEach((branch) => {
+            ofcHashmap.set(branch.drawab.element.getId(),branch.drawab.material.getId())
+            //per forza ricorsiva ti faccio domani
+        })
+
+
+    }
+    static recDrawOrder(sNode,acc){
+
     }
     addSon(element){
         var newTree = new sceneNode(element)

@@ -28,6 +28,9 @@ class Element {
     loadTexCoords(texCoordArray){
         this.texCoords = new Float32Array(texCoordArray)
     }
+    getId(){
+        return this.id
+    }
 
 }
 

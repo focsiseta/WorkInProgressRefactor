@@ -12,6 +12,10 @@ Dirty bit : if a Drawable isn't transformed, no need to recalculate his frame
 
 # What needs to be done
 
+A LOT of things
+
+Point light -> Spotlight
+
 Deferred shading
 
 Ordering of objects to render : 
@@ -20,5 +24,5 @@ Ordering of objects to render :
     then only same Texture different elements
     Only after that different Material with different Element
     
-Understand and test various pass that can be done with shaders
+I would like to try to have a light pass, just because overkilling is fun
 
