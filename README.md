@@ -30,4 +30,8 @@ Ordering of objects to render :
  and other stuff
  
  I hope to make something more general purpose, not as powerful as unity, but at least something easy to use
+ 
+ # Problems
+ 
+ If you don't open index.html with support from a webserver, textures won't load (At least, I think. For now it seems like it, but I'm not entirely sure)
 
