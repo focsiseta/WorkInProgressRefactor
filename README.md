@@ -24,5 +24,14 @@ Ordering of objects to render :
     then only same Texture different elements
     Only after that different Material with different Element
     
-I would like to try to have a light pass, just because overkilling is fun
+ 
+ Post-processing
+ 
+ and other stuff
+ 
+ I hope to make something more general purpose, not as powerful as unity, but at least something easy to use
+ 
+ # Problems
+ 
+ If you don't open index.html with support from a webserver, textures won't load (At least, I think. For now it seems like it, but I'm not entirely sure)
 
