@@ -4,10 +4,14 @@ const shapeCube = new Element("cube",
     cube.vertices[0].values,
     cube.vertices[1].values,
     cube.connectivity[0].indices,
-    generateTexCoords(cube.vertices[0].values.length),Element.ElementType.SHAPE,"TRIANGLES")
+    cube.vertices[3].values,Element.ElementType.SHAPE,"TRIANGLES")
 const shapeCrate = new Element("crate",crateWTexture.vertices[0].values,
     crateWTexture.vertices[1].values,crateWTexture.connectivity[0].indices,crateWTexture.vertices[3].values,Element.ElementType.SHAPE,"TRIANGLES")
 const shapeSphere = new Element("sphere",sphere.vertices[0].values, sphere.vertices[1].values,sphere.connectivity[0].indices,generateTexCoords(sphere.vertices[0].values.length),Element.ElementType.SHAPE,"TRIANGLES")
+const shapeQuad = new Element("quad",cube.vertices[0].values,
+    cube.vertices[1].values,
+    cube.connectivity[0].indices,
+    cube.vertices[3].values,Element.ElementType.SHAPE,"TRIANGLES")
 
 
 function setup(shader){
@@ -26,20 +30,37 @@ function createScene(shader){
     Texture.loadTexture(shader, "texture/heightmaps/brickheight.jpg")
     var randomMaterial = new Material("random","texture/bricks.jpg","texture/heightmaps/brickheight.jpg")
     var boxMaterial = new Material("Brick","texture/textureBox.png")
-    shapeCube.loadTexCoords(LazyUVMappingMatrix(shapeCube,1024,1024))
+    //shapeCube.loadTexCoords(LazyUVMappingMatrix(shapeCube,1024,1024))
     shader.loadElement(shapeCube)
     shader.loadElement(shapeCrate)
     shader.loadElement(shapeSphere)
+    shader.loadElement(shapeQuad)
     //var textureHandler = new Texture()
-    var directional = new DirectionalLight("Test",0.7,1,[-1,-1,0],[1,1,1])
+    var directional = new DirectionalLight("Test",0.7,1,[0,-1,0],[1,1,1])
     //directional.translate([0,0,0])
     DirectionalLight.bindLights(shader)
     DirectionalLight.loadLights(shader)
+    var land = new Drawable(Transformations.gimbalT.XYZ,shapeQuad,boxMaterial)
+    land.translate([0,-110,0])
+    land.scale([100,100,100])
+    terrain = new sceneNode(land)
+    terrain.drawScene(shader)
+
     var aaa = new sceneNode(new Drawable(Transformations.gimbalT.XYZ,shapeCube,randomMaterial))
     aaa.drawab.scale([10,10,10])
     var bbb = new sceneNode(new Drawable(Transformations.gimbalT.XYZ,shapeCube,boxMaterial))
     bbb.drawab.translate([2,0,0])
-    aaa.addSubTree(bbb)
+    for(var i = 0; i < 10;i++){
+        var tmp = new Drawable(Transformations.gimbalT.XYZ,shapeCube,randomMaterial)
+        if((i % 2 ) === 0){
+            tmp.translate([3*i,0,0])
+            aaa.addSon(tmp)
+        }else{
+            tmp.translate([-3*i,0,0])
+            aaa.addSon(tmp)
+        }
+    }
+    sceneNode.drawOrder(aaa)
 
     //node.drawab.lRotateAlpha(80)
 
@@ -53,7 +74,8 @@ function drawEl(){
     scemoShader.setMatrixUniform("uViewMatrix",cam.getViewMatrix())
     scemoShader.setVectorUniform('uEyePosition',cam.getCameraPosition())
     oof.calcSceneDraw(scemoShader)
-   window.requestAnimationFrame(drawEl)
+    terrain.drawScene(scemoShader)
+    window.requestAnimationFrame(drawEl)
 
 }
 

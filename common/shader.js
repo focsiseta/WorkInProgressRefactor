@@ -75,11 +75,6 @@ class Shader {
     }
     loadElement(toLoad){
         var context = this.gl
-        //Vertices
-        toLoad.vBuffer = context.createBuffer()
-        context.bindBuffer(context.ARRAY_BUFFER,toLoad.vBuffer)
-        context.bufferData(context.ARRAY_BUFFER,toLoad.vertices,context.STATIC_DRAW)
-        context.bindBuffer(context.ARRAY_BUFFER,null)
         //Normals
         toLoad.nBuffer = context.createBuffer()
         context.bindBuffer(context.ARRAY_BUFFER,toLoad.nBuffer)
@@ -89,6 +84,11 @@ class Shader {
         toLoad.texCoordBuffer = context.createBuffer()
         context.bindBuffer(context.ARRAY_BUFFER,toLoad.texCoordBuffer)
         context.bufferData(context.ARRAY_BUFFER,toLoad.texCoords,context.STATIC_DRAW)
+        context.bindBuffer(context.ARRAY_BUFFER,null)
+        //Vertices
+        toLoad.vBuffer = context.createBuffer()
+        context.bindBuffer(context.ARRAY_BUFFER,toLoad.vBuffer)
+        context.bufferData(context.ARRAY_BUFFER,toLoad.vertices,context.STATIC_DRAW)
         context.bindBuffer(context.ARRAY_BUFFER,null)
         //Indices
         toLoad.iBuffer = context.createBuffer()

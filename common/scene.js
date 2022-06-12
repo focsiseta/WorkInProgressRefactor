@@ -22,19 +22,26 @@ class sceneNode{
         * */
 
         var ofcHashmap = new Map()
-        if(node.element !== null && node.material !== null ){
-            //I'm not sure if this control is really needed
-            ofcHashmap.set(node.drawab.element.getId(),node.drawab.material.getId())
-        }
-        node.forEach((branch) => {
-            ofcHashmap.set(branch.drawab.element.getId(),branch.drawab.material.getId())
-            //per forza ricorsiva ti faccio domani
+        sceneNode.recDrawOrder(node,ofcHashmap)
+        console.log(ofcHashmap)
+        ofcHashmap.forEach((value) =>{
         })
-
 
     }
     static recDrawOrder(sNode,acc){
-
+        if(sNode.drawab != null && sNode.drawab.material != null ){
+            var key = sNode.drawab.shape.getId() + sNode.drawab.material.getId()
+            var exists = acc.has(key) //If pair already exists
+            if(exists){
+                var array = acc.get(key)
+                array.push(sNode.drawab)
+            }else{
+                acc.set(key,[sNode.drawab])
+            }
+        }
+        sNode.branches.forEach((branch) => {
+            sceneNode.recDrawOrder(branch,acc)
+        })
     }
     addSon(element){
         var newTree = new sceneNode(element)
