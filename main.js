@@ -37,44 +37,53 @@ function createScene(shader){
     shader.loadElement(shapeQuad)
     //var textureHandler = new Texture()
     var directional = new DirectionalLight("Test",0.7,1,[0,-1,0],[1,1,1])
+    pointLight = new PointLight("TestPoint",0.7,1,[1,0,1],[0,0,0])
     //directional.translate([0,0,0])
+    PointLight.bindLights(shader)
+    PointLight.loadLights(shader)
     DirectionalLight.bindLights(shader)
     DirectionalLight.loadLights(shader)
     var land = new Drawable(Transformations.gimbalT.XYZ,shapeQuad,boxMaterial)
     land.translate([0,-110,0])
     land.scale([100,100,100])
     terrain = new sceneNode(land)
-    terrain.drawScene(shader)
+
 
     var aaa = new sceneNode(new Drawable(Transformations.gimbalT.XYZ,shapeCube,randomMaterial))
-    aaa.drawab.scale([10,10,10])
-    var bbb = new sceneNode(new Drawable(Transformations.gimbalT.XYZ,shapeCube,boxMaterial))
-    bbb.drawab.translate([2,0,0])
-    for(var i = 0; i < 10;i++){
-        var tmp = new Drawable(Transformations.gimbalT.XYZ,shapeCube,randomMaterial)
-        if((i % 2 ) === 0){
-            tmp.translate([3*i,0,0])
-            aaa.addSon(tmp)
-        }else{
-            tmp.translate([-3*i,0,0])
-            aaa.addSon(tmp)
-        }
-    }
-    sceneNode.drawOrder(aaa)
 
     //node.drawab.lRotateAlpha(80)
 
     return aaa
 }
-
+randomCounter = 0
+randomFlag = false
 function drawEl(){
     //oof.drawab.lRotateGamma(0.01)
     //oof.drawab.wRotateZ(0.001)
     cam.processInput(handler)
     scemoShader.setMatrixUniform("uViewMatrix",cam.getViewMatrix())
     scemoShader.setVectorUniform('uEyePosition',cam.getCameraPosition())
+//    console.log(cam.getCameraPosition())
     oof.calcSceneDraw(scemoShader)
     terrain.drawScene(scemoShader)
+    if(randomFlag && randomCounter < 300){
+        pointLight.translate([0,-0.1,0])
+        pointLight.updatePosition()
+        PointLight.updateLights(scemoShader)
+    }else{
+        pointLight.translate([0,0.1,0])
+        pointLight.updatePosition()
+        PointLight.updateLights(scemoShader)
+    }
+    randomCounter++
+    if(randomCounter > 300){
+        randomFlag = !randomFlag
+        randomCounter = 0
+    }
+    //console.log(randomFlag,randomCounter)
+
+    //terrain.drawab.translate([0.1,0.1,0.0])
+    //terrain.calcSceneDraw(scemoShader)
     window.requestAnimationFrame(drawEl)
 
 }

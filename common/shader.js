@@ -137,6 +137,9 @@ class Shader {
     bindUniform(id) {
         this.uniforms.push(id) //Utilizzato per mettere i nomi degli uniform che non vengono parsati dentro lo shader, guarda sun in fsShaderBase
         this[id] = this.gl.getUniformLocation(this.program, id)
+        if(this[id] == null){
+            this.uniLog += `Error uniform id: ${id} does not exist`
+        }
     }
 
     static parseShaders(vsSource, fsSource) {

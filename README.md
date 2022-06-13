@@ -14,9 +14,13 @@ Dirty bit : if a Drawable isn't transformed, no need to recalculate his frame
 
 A LOT of things
 
-Point light -> Spotlight
+Height map
+
+Spotlight
 
 Deferred shading
+
+Fix : If we use local rotation, global rotations get overwritten and this is because the way local rotation are applied. Needless to say this isn't a feature
 
 Ordering of objects to render : 
     
@@ -25,11 +29,22 @@ Ordering of objects to render :
     Only after that different Material with different Element
     
  
- Post-processing
+ Post-processing : Shadow Map
  
  and other stuff
+
+# Already Done
  
- I hope to make something more general purpose, not as powerful as unity, but at least something easy to use
+ Directional Light 
+ 
+ Point Light
+
+ Local and Global rotations
+ 
+
+# Goal
+ 
+ I hope to make something more general purpose, not as powerful as unity, but at least something easy to use for our uni assignment
  
  # Problems
  
