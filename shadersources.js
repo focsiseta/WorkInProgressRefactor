@@ -158,7 +158,7 @@ const fsShaderBase  = `
             vec3 viewDirection = normalize(cameraPos - fragCoord);
             //Half way vector
             vec3 H = normalize(normalize(-light.direction) + normalize(viewDirection));
-            vec4 specularColor = pow(max(0.0,dot(H,normalizedNormal)), 64.)  * texture2D(uDiffuseColor,vTextureCoord) * vec4(light.color,1.0);
+            vec4 specularColor = pow(max(0.5,dot(H,normalizedNormal)), 64.)  * texture2D(uDiffuseColor,vTextureCoord) * vec4(light.color,1.0);
             light.ambient = ambientColor;
             light.diffuse = diffuseColor;
             light.specular = specularColor;
@@ -179,24 +179,24 @@ const fsShaderBase  = `
             return (specularComponent + diffuseComponent + ambientComponent) * attenuationFactor;
         }
         vec4 CalcSpotLight(SpotLight light,vec3 cameraPos,vec3 normal,vec3 fragPos){
-        //todo to correct
             //Theta is the cosine between fragpos and light.direction
-            float theta = dot(normalize(light.position - fragPos),normalize(-light.direction));
+            float theta = dot(normalize(light.position - fragPos) ,normalize(-light.direction));
             vec3 normalizedNormal = normalize(normal);
-            vec3 rayDirection = normalize(light.position - fragPos);
+            vec3 rayDirection = normalize(light.direction);
             if(theta > light.cutoff){
-                vec3 distanceVector = fragPos - light.position;
-                float distance = length(distanceVector);
+                vec3 distanceVector = light.position - fragPos;
+                float dist = length(distanceVector);
                 vec3 viewDirection = normalize(fragPos - cameraPos);
-                float attenuationFactor = 1. / (1. + light.Kl * distance + light.Kq * pow(distance,2.));
+                float attenuation = 1. / (1. + light.Kl * dist + light.Kq * pow(dist,2.));
+                float attenuationFactor = min(attenuation,1.0);
                 vec4 ambientComponent = vec4(light.color * light.ambientInt,1.0) * texture2D(uDiffuseColor,vTextureCoord);
                 vec4 diffuseComponent = vec4(light.color * light.diffuseInt,1.0) * texture2D(uDiffuseColor,vTextureCoord) * max(0.0,dot(normalizedNormal,-rayDirection));
                 //Half way vector
                 vec3 H = normalize(normalize(-rayDirection) + normalize(viewDirection));
-                vec4 specularComponent = pow(max(dot(normalizedNormal,H),0.0),1.) * texture2D(uDiffuseColor,vTextureCoord) * vec4(light.color,1.0);
-                return (specularComponent + diffuseComponent + ambientComponent) * attenuationFactor;
+                vec4 specularComponent = pow(max(dot(normalizedNormal,H),0.0),64.) * texture2D(uDiffuseColor,vTextureCoord) * vec4(light.color,1.0);
+                return (specularComponent + ambientComponent + diffuseComponent) * attenuationFactor;
             }
-            return vec4(0.0);//vec4(light.color * light.diffuseInt,1.0) * texture2D(uDiffuseColor,vTextureCoord) * max(0.0,dot(normalizedNormal,-rayDirection));
+            return vec4(light.color * light.ambientInt,1.0) * texture2D(uDiffuseColor,vTextureCoord);
         }
         
         void main(void){

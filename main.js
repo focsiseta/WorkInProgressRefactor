@@ -34,12 +34,13 @@ function createScene(shader){
     shader.loadElement(shapeQuad)
     var randomMaterial = new Material("random","texture/bricks.jpg","texture/heightmaps/brickheight.jpg")
     var boxMaterial = new Material("Brick","texture/textureBox.png")
-    spotLight = new SpotLight("TestPoint",0.7,5,[1,1,1],[0,10,0],[0,-1,0],30)
-    spotLight.translate([50,0,0])
+    //directionalLight = new DirectionalLight("Directional",0.7,0.5,[0,-1,0],[1,1,1])
+    spotLight = new SpotLight("TestPoint",0.7,0.3,[1,1,1],[0,50,50],[0,-1,-1],30,)
 
-    var land = new Drawable(Transformations.gimbalT.XYZ,shapeQuad,randomMaterial)
+
+    var land = new Drawable(Transformations.gimbalT.XYZ,shapeCrate,randomMaterial)
     //land.translate([0,-110,0])
-    land.scale([100,1,100])
+    land.scale([100,2,100])
     land.translate([0,-10,0])
     terrain = new sceneNode(land)
 
@@ -64,23 +65,15 @@ function createScene(shader){
 randomCounter = 0
 randomFlag = false
 function drawEl(){
-    //oof.drawab.lRotateGamma(0.01)
-    //oof.drawab.wRotateZ(0.001)
     cam.processInput(handler)
     scemoShader.setMatrixUniform("uViewMatrix",cam.getViewMatrix())
     scemoShader.setVectorUniform('uEyePosition',cam.getCameraPosition())
-    oof.drawab.lRotateBeta(0.01)
+    //oof.drawab.lRotateBeta(0.01)
 //    console.log(cam.getCameraPosition())
     if(randomFlag && randomCounter <  300){
-        oof.drawab.translate([0,-0.1,0])
-
-        //pointLight.lRotateAlpha(0.1)
-        //pointLight.updatePosition()
-        //SpotLight.updateLights(scemoShader)
+        //oof.drawab.translate([0,-0.1,0])
     }else{
-        oof.drawab.translate([0,0.1,0])
-        //pointLight.updatePosition()
-        //SpotLight.updateLights(scemoShader)
+        //oof.drawab.translate([0,0.1,0])
     }
     randomCounter++
     if(randomCounter > 300){
