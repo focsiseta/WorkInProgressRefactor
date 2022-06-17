@@ -1,3 +1,5 @@
+/*
+* Light code could be way more clean,but I don't want to spoil all the fun for other people*/
 class Light extends Transformations{
     constructor(type = "Local",diffuseInt,ambientInt,color) {
         super(Transformations.gimbalT.XYZ)
@@ -31,6 +33,8 @@ class DirectionalLight extends Light{
         DirectionalLight.counter++
     }
     getDirection(){
+        var updatedMatrix = this.getTransformation()
+        this.direction = [updatedMatrix[8],updatedMatrix[9],updatedMatrix[10]]
         return this.direction
     }
     static getLightCounter(){
@@ -79,7 +83,7 @@ class PointLight extends Light{
     *
     * */
     //The attenuation function needs 2 params and usually a linear constant
-    // since everyone uses Kc = 1, I will as well
+    // since everyone uses Kc = 1, I will as well, so it's hardcoded into the shader
     static counter = 0.0
     static lightKeeper = []
     static Kc = 1.0
@@ -90,6 +94,7 @@ class PointLight extends Light{
         this.Kq = quadraticTerm
         this.translate(position)
         this.position = [this.transformationMatrix[12],this.transformationMatrix[13],this.transformationMatrix[14]]
+        this.uniformID = "pointLightArray[" + PointLight.counter + "]"
         PointLight.counter++
         PointLight.lightKeeper.push(this)
     }
@@ -149,7 +154,105 @@ class PointLight extends Light{
     getKl(){
         return this.Kl
     }
+}
+//Basically point lights with cutoff angle
+class SpotLight extends Light{
+    static counter = 0
+    static lightKeeper = []
+    constructor(id = "SpotLight_"+SpotLight.counter,diffuseInt,ambientInt,color,position,direction,cutoffAngle = 150,linearTerm = 0.0022,quadraticTerm = 0.0019){
+        super(id,diffuseInt,ambientInt,color);
+        this.translate(position)
+        var updatedMatrix = this.getTransformation()
+        this.position = [updatedMatrix[12],updatedMatrix[13],updatedMatrix[14]]
+        this.defaultPosition = position
+        this.cutoffAngle = cutoffAngle
+        this.Kl = linearTerm
+        this.Kq = quadraticTerm
+        this.direction = direction
+        this.uniformID = "spotLightArray[" + SpotLight.counter + "]"
+        SpotLight.counter++
+        SpotLight.lightKeeper.push(this)
+    }
+    static bindLights(shader){
+        shader.setUniform1Int("N_SPOTLIGHTS",SpotLight.counter)
+        for(let i = 0;i < SpotLight.counter;i++) {
+            shader.bindUniform("spotLightArray[" + i + "].diffuseInt")
+            shader.bindUniform("spotLightArray[" + i + "].ambientInt")
+            shader.bindUniform("spotLightArray[" + i + "].color")
+            shader.bindUniform("spotLightArray[" + i + "].position")
+            shader.bindUniform("spotLightArray[" + i + "].Kq")
+            shader.bindUniform("spotLightArray[" + i + "].Kl")
+            shader.bindUniform("spotLightArray[" + i + "].cutoff")
+            shader.bindUniform("spotLightArray[" + i + "].direction")
 
 
+        }
+    }
+    static loadLights(shader){
+        /*  struct SpotLight{
+            //Uniform
+            float diffuseInt;
+            float ambientInt;
+            vec3 color;
+            vec3 position;
+            float Kq;
+            float Kl;
+            float cutoff;
 
+            //Not uniform
+            vec4 specular;
+            vec4 ambient;
+            vec4 diffuse;
+            }
+        */
+
+        for(let i = 0;i < SpotLight.counter;i++) {
+            shader.setUniform1Float("spotLightArray[" + i + "].diffuseInt",this.lightKeeper[i].getDiffuseInt())
+            shader.setUniform1Float("spotLightArray[" + i + "].ambientInt",this.lightKeeper[i].getAmbientInt())
+            shader.setVectorUniform("spotLightArray[" + i + "].color",this.lightKeeper[i].getColor())
+            shader.setVectorUniform("spotLightArray[" + i + "].position",this.lightKeeper[i].getPosition())
+            shader.setUniform1Float("spotLightArray[" + i + "].Kq",this.lightKeeper[i].getKq())
+            shader.setUniform1Float("spotLightArray[" + i + "].Kl",this.lightKeeper[i].getKl())
+            shader.setUniform1Float("spotLightArray[" + i + "].cutoff",this.lightKeeper[i].getCutoff())
+            shader.setVectorUniform("spotLightArray[" + i + "].direction",this.lightKeeper[i].getDirection())
+
+        }
+
+    }
+    getPosition(){
+        this.updatePosition()
+        return this.position
+    }
+    getKq(){
+        return this.Kq
+    }
+    setCutoff(angle){
+        this.cutoffAngle = angle
+    }
+    getKl(){
+        return this.Kl
+    }
+    getCutoff(){
+        return Math.cos(gradToRad(this.cutoffAngle))
+    }
+    getDirection(){
+        return this.direction
+    }
+    updatePosition(){
+        this.position = glMatrix.vec3.transformMat4(this.position,this.defaultPosition,this.frame)
+        //console.log(this.position)
+    }
+    static updateLights(shader){
+        for(let i = 0;i < SpotLight.counter;i++) {
+            shader.setUniform1Float("spotLightArray[" + i + "].cutoff",this.lightKeeper[i].getCutoff())
+            shader.setVectorUniform("spotLightArray[" + i + "].position",SpotLight.lightKeeper[i].getPosition())
+            shader.setVectorUniform("spotLightArray[" + i + "].direction",SpotLight.lightKeeper[i].getDirection())
+
+        }
+    }
+    updateLight(shader){
+        shader.setUniform1Float(this.uniformID + ".cutoff",this.getCutoff())
+        shader.setVectorUniform(this.uniformID + ".position",this.getPosition())
+        shader.setVectorUniform(this.uniformID + ".direction",this.getDirection())
+    }
 }

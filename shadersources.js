@@ -90,8 +90,11 @@ const fsShaderBase  = `
         uniform int N_DIRLIGHTS;
         //We can have an offset for deciding which light is going to be rendered
         
-        //How many point light
+        //How many point lights
         uniform int N_POINTLIGHTS;
+        
+        //How many spotlights
+        uniform int N_SPOTLIGHTS; 
         
         struct DirectionalLight{
             //Uniform
@@ -120,14 +123,33 @@ const fsShaderBase  = `
             vec4 diffuse;
         };
         
+        struct SpotLight{
+            //Uniform
+            float diffuseInt;
+            float ambientInt;
+            vec3 color;
+            vec3 position;
+            vec3 direction;
+            float Kq;
+            float Kl;
+            float cutoff;
+
+            //Not uniform
+            vec4 specular;
+            vec4 ambient;
+            vec4 diffuse;
+        };
+        
         uniform sampler2D uDiffuseColor; // Texture
         uniform sampler2D uNormalMap; //Height map
         
         
         //Luke skywalker
-        uniform DirectionalLight sun[10];
+        uniform DirectionalLight sun[1];
         //Point lights
-        uniform PointLight pointLightArray[64];
+        uniform PointLight pointLightArray[10];
+        //Spotlight
+        uniform SpotLight spotLightArray[10];
         
         vec4 CalcDirectionalLight(DirectionalLight light,vec3 cameraPos,vec3 normal,vec3 fragCoord){
             vec3 normalizedNormal = normalize(normal);
@@ -144,7 +166,7 @@ const fsShaderBase  = `
         }
         vec4 CalcPointLight(PointLight light,vec3 cameraPos,vec3 normal,vec3 fragPos){
             vec3 normalizedNormal = normalize(normal);
-            vec3 rayDirection = normalize(fragPos - light.position);
+            vec3 rayDirection = normalize(light.position - fragPos);
             vec3 distanceVector = fragPos - light.position;
             float distance = length(distanceVector);
             vec3 viewDirection = normalize(fragPos - cameraPos);
@@ -156,19 +178,43 @@ const fsShaderBase  = `
             vec4 specularComponent = pow(max(dot(normalizedNormal,H),0.0),1.) * texture2D(uDiffuseColor,vTextureCoord) * vec4(light.color,1.0);
             return (specularComponent + diffuseComponent + ambientComponent) * attenuationFactor;
         }
+        vec4 CalcSpotLight(SpotLight light,vec3 cameraPos,vec3 normal,vec3 fragPos){
+        //todo to correct
+            //Theta is the cosine between fragpos and light.direction
+            float theta = dot(normalize(light.position - fragPos),normalize(-light.direction));
+            vec3 normalizedNormal = normalize(normal);
+            vec3 rayDirection = normalize(light.position - fragPos);
+            if(theta > light.cutoff){
+                vec3 distanceVector = fragPos - light.position;
+                float distance = length(distanceVector);
+                vec3 viewDirection = normalize(fragPos - cameraPos);
+                float attenuationFactor = 1. / (1. + light.Kl * distance + light.Kq * pow(distance,2.));
+                vec4 ambientComponent = vec4(light.color * light.ambientInt,1.0) * texture2D(uDiffuseColor,vTextureCoord);
+                vec4 diffuseComponent = vec4(light.color * light.diffuseInt,1.0) * texture2D(uDiffuseColor,vTextureCoord) * max(0.0,dot(normalizedNormal,-rayDirection));
+                //Half way vector
+                vec3 H = normalize(normalize(-rayDirection) + normalize(viewDirection));
+                vec4 specularComponent = pow(max(dot(normalizedNormal,H),0.0),1.) * texture2D(uDiffuseColor,vTextureCoord) * vec4(light.color,1.0);
+                return (specularComponent + diffuseComponent + ambientComponent) * attenuationFactor;
+            }
+            return vec4(0.0);//vec4(light.color * light.diffuseInt,1.0) * texture2D(uDiffuseColor,vTextureCoord) * max(0.0,dot(normalizedNormal,-rayDirection));
+        }
         
         void main(void){
             vec4 finalColor = vec4(0.0,0.0,0.0,1.0);//texture2D(uDiffuseColor,vTextureCoord);
             int dirLightCounter = int(N_DIRLIGHTS);
             int posLightCounter = int(N_POINTLIGHTS);
+            int spotLightCounter = int(N_SPOTLIGHTS);
             for(int i = 0; i < 64; i++){
                 //Height map code
-                //vec3 normal = texture2D(uNormalMap,vTextureCoord).rgb * vec3(0.5) + vec3(0.5);
+                vec3 normal = texture2D(uNormalMap,vTextureCoord).rgb * vec3(0.5) + vec3(0.5);
                 if(i < posLightCounter){
                     finalColor += CalcPointLight(pointLightArray[i],uEyePosition,vNormal,vPositionC.xyz);
                 }
                 if(i < dirLightCounter){
                     finalColor += CalcDirectionalLight(sun[i],uEyePosition,vNormal,vPositionC.xyz);
+                }
+                if(i < spotLightCounter){
+                    finalColor += CalcSpotLight(spotLightArray[i],uEyePosition,vNormal,vPositionC.xyz);
                 }
             }
             gl_FragColor = finalColor;

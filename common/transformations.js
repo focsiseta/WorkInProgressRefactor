@@ -35,6 +35,8 @@ class Transformations {
 
     }
     update(){
+        //todo
+        //Still does some unwanted math, but I have other stuff to write rn
         if(this.dirty){
             //console.log("Doing math...")
             this.dirty = false
@@ -92,7 +94,7 @@ class Transformations {
 
         this.rotationMatrix = tmp1
     }
-    //Set of functions to brutally set angles
+    //Set of functions to brutally set angles useful for fixing rotation bug
     setAlpha(alpha) { this.alpha = alpha % (Math.PI*2) }
     setBeta(beta) { this.beta = beta % (Math.PI*2) }
     setGamma(gamma) { this.gamma = gamma % (Math.PI*2) }
@@ -146,6 +148,10 @@ class Transformations {
     getTransformation(){
         this.update()
         return this.transformationMatrix
+    }
+    getRotation(){
+        this.update()
+        return this.rotationMatrix
     }
     setFatherFrame(frame){
         this.dirty = true

@@ -2,6 +2,7 @@ class sceneNode{
 
     constructor(drawab = null) {
         this.drawab = drawab
+        this.lights = []
         this.branches = []
         this.sortedDrawables = []
     }
@@ -43,6 +44,9 @@ class sceneNode{
             sceneNode.recDrawOrder(branch,acc)
         })
     }
+    attachLight(light){
+        this.lights.push(light)
+    }
     addSon(element){
         var newTree = new sceneNode(element)
         this.branches.push(newTree)
@@ -67,13 +71,18 @@ class sceneNode{
 
         if(dirty){
             sNode.drawab.setFatherFrame(acc)
+            sNode.lights.forEach((light) =>{
+                light.setFatherFrame(acc)
+            })
         }
         sNode.branches.forEach((branch) =>{
-            sceneNode.recCalcScene(branch,sNode.drawab.getFrame(),dirty)
+            sceneNode.recCalcScene(branch,sNode.drawab.frame,dirty)
         })
     }
     calcSceneDraw(shader){ //useful when you want perpetual movement
-        sceneNode.recCalcSceneDraw(this,glMatrix.mat4.create(),shader,this.drawab.getDirty())
+        if(this.drawab != null)
+
+            sceneNode.recCalcSceneDraw(this,glMatrix.mat4.create(),shader,this.drawab.getDirty())
     }
     static recCalcSceneDraw(sNode,acc,shader,dirty){
         if(sNode.drawab == null){
@@ -84,13 +93,19 @@ class sceneNode{
         }
         if(dirty){
             sNode.drawab.setFatherFrame(acc)
+            var thisFrame = sNode.drawab.frame
+            sNode.lights.forEach((light) =>{
+                light.setFatherFrame(thisFrame)
+                light.updateLight(shader)
+            })
         }
+        //This needs to go
         if(sNode.drawab.elementType !== Element.ElementType.LIGHT)
             shader.drawDrawable(sNode.drawab)
 
 
         sNode.branches.forEach((branch) =>{
-            sceneNode.recCalcSceneDraw(branch,sNode.drawab.getFrame(),shader,dirty)
+            sceneNode.recCalcSceneDraw(branch,sNode.drawab.frame,shader,dirty)
         })
     }
     drawScene(shader){
@@ -103,7 +118,9 @@ class sceneNode{
             })
             return
         }
-
+        sNode.lights.forEach((light) =>{
+            light.updateLight(shader)
+        })
         if(sNode.drawab.elementType !== Element.ElementType.LIGHT)
             shader.drawDrawable(sNode.drawab)
 

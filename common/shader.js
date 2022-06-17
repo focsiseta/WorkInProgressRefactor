@@ -52,6 +52,7 @@ class Shader {
     drawDrawable(toDraw){
         var context = this.gl
         if(!(Shader.id_last_material === toDraw.material.getId())){
+            //Fix here for deactivating material
             toDraw.material.activateMaterial(this)
             Shader.id_last_material = toDraw.material.getId()
         }
@@ -68,8 +69,8 @@ class Shader {
             Shader.id_last_draw = toDraw.shape.id
         }
 
-        this.setMatrixUniform("uM",toDraw.getFrame())
-        context.uniformMatrix4fv(this['uInvTransGeoMatrix'],false,toDraw.getInverseTranspose())
+        this.setMatrixUniform("uM",toDraw.frame)
+        context.uniformMatrix4fv(this['uInvTransGeoMatrix'],false,toDraw.inverseTransposeMatrix)
         context.drawElements(context[toDraw.shape.drawType],toDraw.shape.indices.length,context.UNSIGNED_SHORT,0)
 
     }

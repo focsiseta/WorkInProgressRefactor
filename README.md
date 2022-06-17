@@ -18,6 +18,8 @@ Height map
 
 Spotlight
 
+Adding light as leaf of the node
+
 Deferred shading
 
 Fix : If we use local rotation, global rotations get overwritten and this is because the way local rotation are applied. Needless to say this isn't a feature

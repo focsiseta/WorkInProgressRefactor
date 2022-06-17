@@ -14,7 +14,7 @@ class Texture{
         var context = shader.getContext()
         var textureBuffer = context.createTexture()
         var thisTexture = context.TEXTURE0+Texture.textureCounter
-        context.activeTexture(thisTexture)
+        //context.activeTexture(thisTexture)
         const image = new Image()
         image.onload = function(){
             context.bindTexture(context.TEXTURE_2D,textureBuffer)
@@ -31,6 +31,7 @@ class Texture{
             }
         }
         image.src = path
+        context.bindTexture(context.TEXTURE_2D,null)
         Texture.pathToTexture.set(path,thisTexture)
         Texture.textureToBuffer.set(thisTexture,textureBuffer)
         Texture.textureCounter++
@@ -70,6 +71,10 @@ class Material{
         context.activeTexture(diffuseTexture)
         context.bindTexture(context.TEXTURE_2D,diffuseBuffer)
         shader.setUniform1Int("uDiffuseColor",diffuseTexture - context.TEXTURE0)
+    }
+    deactivateMaterial(shader){
+        var context = shader.getContext()
+        context.bindTexture(context.TEXTURE_2D,null)
     }
 
 

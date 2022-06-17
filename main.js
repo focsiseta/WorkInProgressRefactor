@@ -28,30 +28,36 @@ function createScene(shader){
     Texture.loadTexture(shader,"texture/bricks.jpg")
     Texture.loadTexture(shader,"texture/textureBox.png")
     Texture.loadTexture(shader, "texture/heightmaps/brickheight.jpg")
-    var randomMaterial = new Material("random","texture/bricks.jpg","texture/heightmaps/brickheight.jpg")
-    var boxMaterial = new Material("Brick","texture/textureBox.png")
-    //shapeCube.loadTexCoords(LazyUVMappingMatrix(shapeCube,1024,1024))
     shader.loadElement(shapeCube)
     shader.loadElement(shapeCrate)
     shader.loadElement(shapeSphere)
     shader.loadElement(shapeQuad)
-    //var textureHandler = new Texture()
-    var directional = new DirectionalLight("Test",0.7,1,[0,-1,0],[1,1,1])
-    pointLight = new PointLight("TestPoint",0.7,1,[1,0,1],[0,0,0])
-    //directional.translate([0,0,0])
+    var randomMaterial = new Material("random","texture/bricks.jpg","texture/heightmaps/brickheight.jpg")
+    var boxMaterial = new Material("Brick","texture/textureBox.png")
+    spotLight = new SpotLight("TestPoint",0.7,5,[1,1,1],[0,10,0],[0,-1,0],30)
+    spotLight.translate([50,0,0])
+
+    var land = new Drawable(Transformations.gimbalT.XYZ,shapeQuad,randomMaterial)
+    //land.translate([0,-110,0])
+    land.scale([100,1,100])
+    land.translate([0,-10,0])
+    terrain = new sceneNode(land)
+
+    var sphere = new Drawable(Transformations.gimbalT.XYZ,shapeSphere,randomMaterial)
+    sphere.scale([3,3,3])
+    var aaa = new sceneNode(sphere)
+    aaa.attachLight(spotLight)
+    sphere.scale([0.1,0.1,0.1])
+
+
+    //node.drawab.lRotateAlpha(80)
+
+    SpotLight.bindLights(shader)
+    SpotLight.loadLights(shader)
     PointLight.bindLights(shader)
     PointLight.loadLights(shader)
     DirectionalLight.bindLights(shader)
     DirectionalLight.loadLights(shader)
-    var land = new Drawable(Transformations.gimbalT.XYZ,shapeQuad,boxMaterial)
-    land.translate([0,-110,0])
-    land.scale([100,100,100])
-    terrain = new sceneNode(land)
-
-
-    var aaa = new sceneNode(new Drawable(Transformations.gimbalT.XYZ,shapeCube,randomMaterial))
-
-    //node.drawab.lRotateAlpha(80)
 
     return aaa
 }
@@ -63,27 +69,28 @@ function drawEl(){
     cam.processInput(handler)
     scemoShader.setMatrixUniform("uViewMatrix",cam.getViewMatrix())
     scemoShader.setVectorUniform('uEyePosition',cam.getCameraPosition())
+    oof.drawab.lRotateBeta(0.01)
 //    console.log(cam.getCameraPosition())
-    oof.calcSceneDraw(scemoShader)
-    terrain.drawScene(scemoShader)
-    if(randomFlag && randomCounter < 300){
-        pointLight.translate([0,-0.1,0])
-        pointLight.updatePosition()
-        PointLight.updateLights(scemoShader)
+    if(randomFlag && randomCounter <  300){
+        oof.drawab.translate([0,-0.1,0])
+
+        //pointLight.lRotateAlpha(0.1)
+        //pointLight.updatePosition()
+        //SpotLight.updateLights(scemoShader)
     }else{
-        pointLight.translate([0,0.1,0])
-        pointLight.updatePosition()
-        PointLight.updateLights(scemoShader)
+        oof.drawab.translate([0,0.1,0])
+        //pointLight.updatePosition()
+        //SpotLight.updateLights(scemoShader)
     }
     randomCounter++
     if(randomCounter > 300){
         randomFlag = !randomFlag
         randomCounter = 0
     }
-    //console.log(randomFlag,randomCounter)
 
-    //terrain.drawab.translate([0.1,0.1,0.0])
-    //terrain.calcSceneDraw(scemoShader)
+
+    oof.calcSceneDraw(scemoShader)
+    terrain.calcSceneDraw(scemoShader)
     window.requestAnimationFrame(drawEl)
 
 }
