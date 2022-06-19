@@ -181,13 +181,13 @@ const fsShaderBase  = `
         vec4 CalcSpotLight(SpotLight light,vec3 cameraPos,vec3 normal,vec3 fragPos){
             //Theta is the cosine between fragpos and light.direction
             vec3 LightDirection = normalize(light.direction);
-            float theta = dot(normalize(light.position - fragPos) , -LightDirection);
+            float theta = dot(normalize(light.position - fragPos) , LightDirection);
             vec3 normalizedNormal = normalize(normal);
            
             if(theta > light.cutoff){
                 vec3 distanceVector = light.position - fragPos;
                 float dist = length(distanceVector);
-                vec3 viewDirection = normalize(cameraPos - fragPos);
+                vec3 viewDirection = normalize(fragPos - cameraPos);
                 float attenuation = 1. / (1. + light.Kl * dist + light.Kq * pow(dist,2.));
                 float attenuationFactor = min(attenuation,1.0);
                 vec4 ambientComponent = vec4(light.color * light.ambientInt,1.0) * texture2D(uDiffuseColor,vTextureCoord);
@@ -197,7 +197,7 @@ const fsShaderBase  = `
                 vec4 specularComponent = pow(max(dot(normalizedNormal,H),0.1),1.) * texture2D(uDiffuseColor,vTextureCoord) * vec4(light.color,1.0);
                 return ((specularComponent+ambientComponent+diffuseComponent) * attenuationFactor);
             }
-            return vec4(light.color * light.ambientInt,1.0) * texture2D(uDiffuseColor,vTextureCoord) * vec4(0.2);
+            return vec4(0.0);
         }
         
         void main(void){

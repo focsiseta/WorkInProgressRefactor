@@ -40,7 +40,7 @@ class Transformations {
         if(this.dirty){
             //console.log("Doing math...")
             this.dirty = false
-            glMatrix.mat4.mul(this.transformationMatrix,this.scaleMatrix,this.translationMatrix)
+            this.transformationMatrix = glMatrix.mat4.mul(this.transformationMatrix,this.translationMatrix,this.scaleMatrix)
             //(T * S) = T * S * R
             glMatrix.mat4.mul(this.transformationMatrix,this.transformationMatrix,this.rotationMatrix)
             /******** Inverse Transpose **************/
@@ -147,6 +147,10 @@ class Transformations {
     getTransformation(){
         this.update()
         return this.transformationMatrix
+    }
+    getTranslation(){
+        this.update()
+        return this.translationMatrix
     }
     getRotation(){
         this.update()

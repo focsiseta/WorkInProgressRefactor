@@ -167,9 +167,9 @@ class SpotLight extends Light{
     constructor(id = "SpotLight_"+SpotLight.counter,diffuseInt,ambientInt,color,position,direction,cutoffAngle = 150,linearTerm = 0.0022,quadraticTerm = 0.0019){
         super(id,diffuseInt,ambientInt,color);
         this.translate(position)
-        var updatedMatrix = this.getTransformation()
+        var updatedMatrix = this.getTranslation()
         this.position = [updatedMatrix[12],updatedMatrix[13],updatedMatrix[14]]
-        this.defaultPosition = this.position
+        this.defaultPosition = position
         this.defaultDirection = direction
         this.cutoffAngle = cutoffAngle
         this.Kl = linearTerm
@@ -242,12 +242,11 @@ class SpotLight extends Light{
         return Math.cos(gradToRad(this.cutoffAngle))
     }
     getDirection(){
-        this.updateDirection()
+        //this.updateDirection()
         return this.direction
     }
     updatePosition(){
         this.position = glMatrix.vec3.transformMat4(this.position,this.defaultPosition,this.frame)
-        //console.log(this.position)
     }
     updateDirection(){
         this.direction =  glMatrix.vec3.transformMat4(this.direction,this.defaultDirection,this.getRotation())
