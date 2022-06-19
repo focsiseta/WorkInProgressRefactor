@@ -44,7 +44,7 @@ class Shader {
         this.gl.enableVertexAttribArray(this["aTextureCoord"])
     }
     contextSetup(){
-        this.gl.enable(gl.CULL_FACE)
+        //this.gl.enable(gl.CULL_FACE)
         this.gl.enable(gl.DEPTH_TEST)
         this.gl.clearColor(0.0,0.0,0.0,0.8)
         this.gl.clear(gl.COLOR_BUFFER_BIT,gl.DEPTH_BUFFER_BIT)
@@ -68,7 +68,6 @@ class Shader {
             context.bindBuffer(context.ELEMENT_ARRAY_BUFFER,toDraw.shape.iBuffer)
             Shader.id_last_draw = toDraw.shape.id
         }
-
         this.setMatrixUniform("uM",toDraw.frame)
         context.uniformMatrix4fv(this['uInvTransGeoMatrix'],false,toDraw.inverseTransposeMatrix)
         context.drawElements(context[toDraw.shape.drawType],toDraw.shape.indices.length,context.UNSIGNED_SHORT,0)

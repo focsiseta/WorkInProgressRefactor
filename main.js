@@ -12,10 +12,15 @@ const shapeQuad = new Element("quad",cube.vertices[0].values,
     cube.vertices[1].values,
     cube.connectivity[0].indices,
     cube.vertices[3].values,Element.ElementType.SHAPE,"TRIANGLES")
+const shapQuad = new Element("rightQuad",[-1, 0, -1, 1, 0, -1, -1, 0, 1, 1, 0, 1],
+    [0,1,0,0,1,0,0,1,0,0,1,0],
+    [0, 2, 1, 1, 2, 3],
+    [0, 0, 0, 1, 1, 0, 1, 1],Element.ElementType.SHAPE,"TRIANGLES")
+const teaPot = new Element("teapot",teapot.vertices[0].values,teapot.vertices[1].values,teapot.connectivity[0].indices,generateTexCoords(teapot.vertices[0].values.length),Element.ElementType.SHAPE,"TRIANGLES")
 
 
 function setup(shader){
-    var camera = new Camera([0,0,50])
+    var camera = new Camera([0,5,50])
     var projMatrix = glMatrix.mat4.create()
     glMatrix.mat4.perspective(projMatrix,3.14/4,1300/720,0.15,1500)
     shader.setMatrixUniform("uViewMatrix",camera.getViewMatrix())
@@ -27,34 +32,42 @@ function setup(shader){
 function createScene(shader){
     Texture.loadTexture(shader,"texture/bricks.jpg")
     Texture.loadTexture(shader,"texture/textureBox.png")
-    Texture.loadTexture(shader, "texture/heightmaps/brickheight.jpg")
+    Texture.loadTexture(shader, "texture/grassTexture.jpg")
     shader.loadElement(shapeCube)
     shader.loadElement(shapeCrate)
     shader.loadElement(shapeSphere)
     shader.loadElement(shapeQuad)
-    var randomMaterial = new Material("random","texture/bricks.jpg","texture/heightmaps/brickheight.jpg")
-    var boxMaterial = new Material("Brick","texture/textureBox.png")
-    //directionalLight = new DirectionalLight("Directional",0.7,0.5,[0,-1,0],[1,1,1])
-    spotLight = new SpotLight("TestPoint",0.7,0.3,[1,1,1],[0,50,50],[0,-1,-1],30,)
+    shader.loadElement(shapQuad)
+    shader.loadElement(teaPot)
+    //var randomMaterial = new Material("random","texture/bricks.jpg","texture/heightmaps/brickheight.jpg")
+    var boxMaterial = new Material("Brick","texture/grassTexture.jpg")
+    pointLight = new PointLight("pointLight",0.7,0.5,[1,1,1],[0,0,0])
 
+    //directionalLight = new DirectionalLight("Directional",0.7,0.5,[0,-3,0],[1,1,1])
+    var wall = new Drawable(Transformations.gimbalT.XYZ,shapQuad,boxMaterial)
+    var wall2 = new Drawable(Transformations.gimbalT.XYZ,teaPot,boxMaterial)
+    var wall3 = new Drawable(Transformations.gimbalT.XYZ,shapeCube,boxMaterial)
+    //wall2.scale([30,1,30])
+    //wall2.wRotateZ(90)
+    //wall2.lRotateGamma(90)
+    //wall2.translate([0,1,0])
+    var aaa = new sceneNode(null)
+    //wall.scale([0.01,0.01,0.01])
+    //wall.scale([0.01,0.01,0.01])
+    wall4 = aaa.addSon(wall2)
+    bbb = new sceneNode(wall)
+    wall.translate([0,-2,0])
+    wall.scale([100,1,100])
 
-    var land = new Drawable(Transformations.gimbalT.XYZ,shapeCrate,randomMaterial)
-    //land.translate([0,-110,0])
-    land.scale([100,2,100])
-    land.translate([0,-10,0])
-    terrain = new sceneNode(land)
+    //wall2.scale([1,1,1])
+   // aaa.calcSceneDraw(scemoShader)
+    pointLight.translate([0,3,0])
+    wall4.attachLight(pointLight)
 
-    var sphere = new Drawable(Transformations.gimbalT.XYZ,shapeSphere,randomMaterial)
-    sphere.scale([3,3,3])
-    var aaa = new sceneNode(sphere)
-    aaa.attachLight(spotLight)
-    sphere.scale([0.1,0.1,0.1])
 
 
     //node.drawab.lRotateAlpha(80)
 
-    SpotLight.bindLights(shader)
-    SpotLight.loadLights(shader)
     PointLight.bindLights(shader)
     PointLight.loadLights(shader)
     DirectionalLight.bindLights(shader)
@@ -68,22 +81,13 @@ function drawEl(){
     cam.processInput(handler)
     scemoShader.setMatrixUniform("uViewMatrix",cam.getViewMatrix())
     scemoShader.setVectorUniform('uEyePosition',cam.getCameraPosition())
-    //oof.drawab.lRotateBeta(0.01)
-//    console.log(cam.getCameraPosition())
-    if(randomFlag && randomCounter <  300){
-        //oof.drawab.translate([0,-0.1,0])
-    }else{
-        //oof.drawab.translate([0,0.1,0])
-    }
-    randomCounter++
-    if(randomCounter > 300){
-        randomFlag = !randomFlag
-        randomCounter = 0
-    }
-
-
-    oof.calcSceneDraw(scemoShader)
-    terrain.calcSceneDraw(scemoShader)
+    //wallW2.drawab.lRotateGamma(1)
+    //wallW2.calcSceneDraw(scemoShader)
+    //oof.drawab.lRotateGamma(0.007)
+    wall4.drawab.translate([0.01,0,0])
+    wall4.calcSceneDraw(scemoShader)
+    bbb.calcSceneDraw(scemoShader)
+    //oof.calcSceneDraw(scemoShader)
     window.requestAnimationFrame(drawEl)
 
 }

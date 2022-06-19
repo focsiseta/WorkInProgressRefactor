@@ -80,9 +80,11 @@ class sceneNode{
         })
     }
     calcSceneDraw(shader){ //useful when you want perpetual movement
-        if(this.drawab != null)
-
-            sceneNode.recCalcSceneDraw(this,glMatrix.mat4.create(),shader,this.drawab.getDirty())
+        if(this.drawab != null) {
+            sceneNode.recCalcSceneDraw(this, glMatrix.mat4.create(), shader, this.drawab.getDirty())
+        }else{
+            sceneNode.recCalcSceneDraw(this, glMatrix.mat4.create(), shader, true)
+        }
     }
     static recCalcSceneDraw(sNode,acc,shader,dirty){
         if(sNode.drawab == null){
@@ -99,13 +101,18 @@ class sceneNode{
                 light.updateLight(shader)
             })
         }
-        //This needs to go
-        if(sNode.drawab.elementType !== Element.ElementType.LIGHT)
-            shader.drawDrawable(sNode.drawab)
+        shader.drawDrawable(sNode.drawab)
+
 
 
         sNode.branches.forEach((branch) =>{
-            sceneNode.recCalcSceneDraw(branch,sNode.drawab.frame,shader,dirty)
+            //console.log(branch.drawab.shape.getId())
+            if(!branch.drawab.getDirty()) {
+                sceneNode.recCalcSceneDraw(branch, sNode.drawab.frame, shader, dirty)
+            }else{
+                sceneNode.recCalcSceneDraw(branch, sNode.drawab.frame, shader, branch.drawab.getDirty())
+
+            }
         })
     }
     drawScene(shader){

@@ -93,7 +93,9 @@ class PointLight extends Light{
         this.Kl = linearTerm
         this.Kq = quadraticTerm
         this.translate(position)
-        this.position = [this.transformationMatrix[12],this.transformationMatrix[13],this.transformationMatrix[14]]
+        var updatedMatrix = this.getTransformation()
+        this.position = [updatedMatrix[12],updatedMatrix[13],updatedMatrix[14]]
+        this.defaultPosition = position
         this.uniformID = "pointLightArray[" + PointLight.counter + "]"
         PointLight.counter++
         PointLight.lightKeeper.push(this)
@@ -135,17 +137,20 @@ class PointLight extends Light{
         }
     }
     updatePosition(){
-        var updatedMatrix = this.getTransformation()
-        this.position = [updatedMatrix[12],updatedMatrix[13],updatedMatrix[14]]
+        this.position = glMatrix.vec3.transformMat4(this.position,this.defaultPosition,this.frame)
     }
     static updateLights(shader){
         for(let i = 0;i < PointLight.counter;i++) {
             shader.setVectorUniform("pointLightArray[" + i + "].position",PointLight.lightKeeper[i].getPosition())
         }
     }
+    updateLight(shader){
+        shader.setVectorUniform(this.uniformID + ".position",this.getPosition())
+    }
 
 
     getPosition(){
+        this.updatePosition()
         return this.position
     }
     getKq(){
@@ -164,7 +169,8 @@ class SpotLight extends Light{
         this.translate(position)
         var updatedMatrix = this.getTransformation()
         this.position = [updatedMatrix[12],updatedMatrix[13],updatedMatrix[14]]
-        this.defaultPosition = position
+        this.defaultPosition = this.position
+        this.defaultDirection = direction
         this.cutoffAngle = cutoffAngle
         this.Kl = linearTerm
         this.Kq = quadraticTerm
@@ -236,11 +242,16 @@ class SpotLight extends Light{
         return Math.cos(gradToRad(this.cutoffAngle))
     }
     getDirection(){
+        this.updateDirection()
         return this.direction
     }
     updatePosition(){
         this.position = glMatrix.vec3.transformMat4(this.position,this.defaultPosition,this.frame)
         //console.log(this.position)
+    }
+    updateDirection(){
+        this.direction =  glMatrix.vec3.transformMat4(this.direction,this.defaultDirection,this.getRotation())
+
     }
     static updateLights(shader){
         for(let i = 0;i < SpotLight.counter;i++) {

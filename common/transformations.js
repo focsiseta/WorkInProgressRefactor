@@ -40,8 +40,7 @@ class Transformations {
         if(this.dirty){
             //console.log("Doing math...")
             this.dirty = false
-            //Transformation matrix
-            glMatrix.mat4.mul(this.transformationMatrix,this.translationMatrix,this.scaleMatrix)
+            glMatrix.mat4.mul(this.transformationMatrix,this.scaleMatrix,this.translationMatrix)
             //(T * S) = T * S * R
             glMatrix.mat4.mul(this.transformationMatrix,this.transformationMatrix,this.rotationMatrix)
             /******** Inverse Transpose **************/
@@ -66,7 +65,7 @@ class Transformations {
         switch(this.type) {
             case 0://XYZ
                 glMatrix.mat4.multiply(tmp1, rotY, rotX)
-                glMatrix.mat4.multiply(tmp1, rotZ, tmp1)
+                glMatrix.mat4.multiply(tmp1,tmp1 ,rotZ)
                 break
             case 1://XZY
                 glMatrix.mat4.multiply(tmp1, rotZ, rotX)
