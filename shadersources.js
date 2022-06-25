@@ -42,6 +42,10 @@ const vsShaderBaseline  = `
         attribute vec3 aNormal;
         //texture
         attribute vec2 aTextureCoord;
+        //tangent
+        attribute vec3 aTangent;
+        //bitangent
+        attribute vec3 aBitangent;
         
         uniform mat4 uInvTransGeoMatrix;
         uniform mat4 uM;
@@ -58,6 +62,8 @@ const vsShaderBaseline  = `
         //interpol. texture
         varying highp vec2 vTextureCoord;
         
+        varying mat3 TBN;
+        
         void main(void){
             //Point in camera space just in case we need it
             vPositionC =  uM * vec4(aPosition,1.0);
@@ -67,6 +73,10 @@ const vsShaderBaseline  = `
             //Correcting normal before having it interpolated for the fragment
             vNormal = (uInvTransGeoMatrix * vec4(aNormal,1.0)).xyz;
             vTextureCoord = aTextureCoord;
+            vec3 T = normalize(vec3(uViewMatrix * vec4(aTangent,0.0)));
+            vec3 B = normalize(vec3(uViewMatrix * vec4(cross(aTangent,aNormal),0.0)));
+            vec3 N = normalize(vec3(uViewMatrix * vec4(aNormal,0.0)));
+            TBN = mat3(T,B,N);
             
         }
         `
@@ -81,6 +91,8 @@ const fsShaderBase  = `
         varying vec3 vNormal;
         //Interpolated tex coordinates
          varying highp vec2 vTextureCoord;
+         //Interpolated TBN
+         varying mat3 TBN;
         
         
         //Camera position
@@ -205,17 +217,20 @@ const fsShaderBase  = `
             int dirLightCounter = int(N_DIRLIGHTS);
             int posLightCounter = int(N_POINTLIGHTS);
             int spotLightCounter = int(N_SPOTLIGHTS);
+            vec3 normal = texture2D(uNormalMap,vTextureCoord).xyz;
+            normal = (normal * 2.0) - vec3(1.0);
+            normal = normalize(TBN * normal);
+            vec3 finalNormal = normal + vNormal;
             for(int i = 0; i < 64; i++){
                 //Height map code
-                vec3 normal = texture2D(uNormalMap,vTextureCoord).rgb * vec3(0.5) + vec3(0.5);
                 if(i < posLightCounter){
-                    finalColor += CalcPointLight(pointLightArray[i],uEyePosition,vNormal,vPositionC.xyz);
+                    finalColor += CalcPointLight(pointLightArray[i],uEyePosition,finalNormal,vPositionC.xyz);
                 }
                 if(i < dirLightCounter){
-                    finalColor += CalcDirectionalLight(sun[i],uEyePosition,vNormal,vPositionC.xyz);
+                    finalColor += CalcDirectionalLight(sun[i],uEyePosition,finalNormal,vPositionC.xyz);
                 }
                 if(i < spotLightCounter){
-                    finalColor += CalcSpotLight(spotLightArray[i],uEyePosition,vNormal,vPositionC.xyz);
+                    finalColor += CalcSpotLight(spotLightArray[i],uEyePosition,finalNormal,vPositionC.xyz);
                 }
             }
             if(finalColor.x == 0.0 && finalColor.y == 0.0 && finalColor.z == 0.0){

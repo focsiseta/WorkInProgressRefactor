@@ -173,3 +173,24 @@ function generateTexCoords(howMany){
     }
     return tmp
 }
+function divideIntoPoints3D(coordinateArray){
+        var points = []
+        for(var i = 0; i < coordinateArray.length / 3;i++){
+            var point = []
+            point.push(coordinateArray[3 * i])
+            point.push(coordinateArray[1 + (3 * i)])
+            point.push(coordinateArray[2 + (3 * i)])
+            points.push(point)
+        }
+        return points
+}
+function divideIntoPoints2D(coordinateArray){
+    var points = []
+    for(var i = 0; i < coordinateArray.length / 2;i++){
+        var point = []
+        point.push(coordinateArray[2 * i])
+        point.push(coordinateArray[1 + (2 * i)])
+        points.push(point)
+    }
+    return points
+}

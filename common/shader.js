@@ -42,6 +42,7 @@ class Shader {
         this.gl.enableVertexAttribArray(this["aPosition"])
         this.gl.enableVertexAttribArray(this["aNormal"])
         this.gl.enableVertexAttribArray(this["aTextureCoord"])
+        this.gl.enableVertexAttribArray(this["aTangent"])
     }
     contextSetup(){
         //this.gl.enable(gl.CULL_FACE)
@@ -63,9 +64,15 @@ class Shader {
             context.bindBuffer(context.ARRAY_BUFFER, toDraw.shape.nBuffer)
             context.vertexAttribPointer(this["aNormal"],3,context.FLOAT,false,0,0)
 
+            context.bindBuffer(context.ARRAY_BUFFER,toDraw.shape.tBuffer)
+            context.vertexAttribPointer(this["aTangent"],3,context.FLOAT,false,0,0)
+
+
+
             context.bindBuffer(context.ARRAY_BUFFER, toDraw.shape.texCoordBuffer)
             context.vertexAttribPointer(this["aTextureCoord"],2,context.FLOAT,false,0,0)
             context.bindBuffer(context.ELEMENT_ARRAY_BUFFER,toDraw.shape.iBuffer)
+
             Shader.id_last_draw = toDraw.shape.id
         }
         this.setMatrixUniform("uM",toDraw.frame)
@@ -79,6 +86,11 @@ class Shader {
         toLoad.nBuffer = context.createBuffer()
         context.bindBuffer(context.ARRAY_BUFFER,toLoad.nBuffer)
         context.bufferData(context.ARRAY_BUFFER,toLoad.normals,context.STATIC_DRAW)
+        context.bindBuffer(context.ARRAY_BUFFER,null)
+        //Tangent
+        toLoad.tBuffer = context.createBuffer()
+        context.bindBuffer(context.ARRAY_BUFFER,toLoad.tBuffer)
+        context.bufferData(context.ARRAY_BUFFER,toLoad.tangents,context.STATIC_DRAW)
         context.bindBuffer(context.ARRAY_BUFFER,null)
         //TexCoords
         toLoad.texCoordBuffer = context.createBuffer()
