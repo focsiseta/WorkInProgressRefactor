@@ -194,3 +194,18 @@ function divideIntoPoints2D(coordinateArray){
     }
     return points
 }
+function attemptToFixUVs(coordArray){
+    var fixedUVs = []
+    coordArray.forEach((value)  =>{
+        if (value != 1 || value != 0){
+            var tmp = Math.floor(value)
+            fixedUVs.push(value - tmp)
+            console.log(value - tmp)
+        }else{
+            fixedUVs.push(value)
+        }
+
+    })
+
+    return fixedUVs
+}

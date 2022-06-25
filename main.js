@@ -17,10 +17,10 @@ const shapQuad = new Element("rightQuad",[-1, 0, -1, 1, 0, -1, -1, 0, 1, 1, 0, 1
     [0, 2, 1, 1, 2, 3],
     [0, 0, 0, 1, 1, 0, 1, 1],Element.ElementType.SHAPE,"TRIANGLES")
 const teaPot = new Element("teapot",teapot.vertices[0].values,teapot.vertices[1].values,teapot.connectivity[0].indices,generateTexCoords(teapot.vertices[0].values.length),Element.ElementType.SHAPE,"TRIANGLES")
-
+console.log(shapQuad.tangents)
 
 function setup(shader){
-    var camera = new Camera([0,5,50])
+    var camera = new Camera([0,5,5])
     var projMatrix = glMatrix.mat4.create()
     glMatrix.mat4.perspective(projMatrix,3.14/4,1300/720,0.15,1500)
     shader.setMatrixUniform("uViewMatrix",camera.getViewMatrix())
@@ -30,9 +30,8 @@ function setup(shader){
 }
 
 function createScene(shader){
+    Texture.loadTexture(shader,"texture/heightmaps/step.jpg")
     Texture.loadTexture(shader,"texture/bricks.jpg")
-    Texture.loadTexture(shader,"texture/textureBox.png")
-    Texture.loadTexture(shader, "texture/grassTexture.jpg")
     shader.loadElement(shapeCube)
     shader.loadElement(shapeCrate)
     shader.loadElement(shapeSphere)
@@ -40,10 +39,10 @@ function createScene(shader){
     shader.loadElement(shapQuad)
     shader.loadElement(teaPot)
     //var randomMaterial = new Material("random","texture/bricks.jpg","texture/heightmaps/brickheight.jpg")
-    var boxMaterial = new Material("Brick","texture/grassTexture.jpg")
-    pointLight = new PointLight("pointLight",0.7,0.5,[1,1,1],[0,0,0])
+    var boxMaterial = new Material("Brick","texture/bricks.jpg","texture/heightmaps/step.jpg")
+    //pointLight = new PointLight("pointLight",0.7,0.5,[1,1,1],[0,0,0])
 
-    //directionalLight = new DirectionalLight("Directional",0.7,0.5,[0,-3,0],[1,1,1])
+    directionalLight = new DirectionalLight("Directional",0.7,0.5,[0,0,-1],[1,1,1])
     var wall = new Drawable(Transformations.gimbalT.XYZ,shapQuad,boxMaterial)
     var wall2 = new Drawable(Transformations.gimbalT.XYZ,teaPot,boxMaterial)
     var wall3 = new Drawable(Transformations.gimbalT.XYZ,shapeCube,boxMaterial)
@@ -56,13 +55,12 @@ function createScene(shader){
     //wall.scale([0.01,0.01,0.01])
     wall4 = aaa.addSon(wall2)
     bbb = new sceneNode(wall)
-    wall.translate([0,-2,0])
-    wall.scale([100,1,100])
+    //wall.translate([0,0,0])
+    wall.scale([100,100,100])
 
     //wall2.scale([1,1,1])
    // aaa.calcSceneDraw(scemoShader)
-    pointLight.translate([0,3,0])
-    wall4.attachLight(pointLight)
+
 
 
 

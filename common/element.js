@@ -58,11 +58,9 @@ class Element {
 
             //console.log(x + "  " + y + "  " + z)
             var tan = [x,y,z]
-            console.log(tan)
             tangent.push(tan)
             tangent.push(tan)
             tangent.push(tan)
-            console.log(tangent)
 
         }
         var flattenedTangents = []

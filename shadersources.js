@@ -169,7 +169,7 @@ const fsShaderBase  = `
             vec4 diffuseColor = vec4(light.color * light.diffuseInt,1.0) * texture2D(uDiffuseColor,vTextureCoord) * max(0.0,dot(normalizedNormal,normalize(-light.direction)));
             vec3 viewDirection = normalize(cameraPos - fragCoord);
             //Half way vector
-            vec3 H = normalize(normalize(-light.direction) + normalize(viewDirection));
+            vec3 H = normalize(normalize(light.direction) + normalize(viewDirection));
             vec4 specularColor = pow(max(0.5,dot(H,normalizedNormal)), 64.)  * texture2D(uDiffuseColor,vTextureCoord) * vec4(light.color,1.0);
             light.ambient = ambientColor;
             light.diffuse = diffuseColor;
@@ -178,7 +178,7 @@ const fsShaderBase  = `
         }
         vec4 CalcPointLight(PointLight light,vec3 cameraPos,vec3 normal,vec3 fragPos){
             vec3 normalizedNormal = normalize(normal);
-            vec3 rayDirection = normalize(light.position - fragPos);
+            vec3 rayDirection = normalize(fragPos - light.position);
             vec3 distanceVector = fragPos - light.position;
             float distance = length(distanceVector);
             vec3 viewDirection = normalize(fragPos - cameraPos);
@@ -220,7 +220,7 @@ const fsShaderBase  = `
             vec3 normal = texture2D(uNormalMap,vTextureCoord).xyz;
             normal = (normal * 2.0) - vec3(1.0);
             normal = normalize(TBN * normal);
-            vec3 finalNormal = normal + vNormal;
+            vec3 finalNormal = normal;
             for(int i = 0; i < 64; i++){
                 //Height map code
                 if(i < posLightCounter){
