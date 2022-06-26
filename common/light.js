@@ -181,6 +181,7 @@ class SpotLight extends Light{
     }
     static bindLights(shader){
         shader.setUniform1Int("N_SPOTLIGHTS",SpotLight.counter)
+        console.log(SpotLight.counter)
         for(let i = 0;i < SpotLight.counter;i++) {
             shader.bindUniform("spotLightArray[" + i + "].diffuseInt")
             shader.bindUniform("spotLightArray[" + i + "].ambientInt")

@@ -42,10 +42,14 @@ function createScene(shader){
     var boxMaterial = new Material("Brick","texture/bricks.jpg","texture/heightmaps/step.jpg")
     //pointLight = new PointLight("pointLight",0.7,0.5,[1,1,1],[0,0,0])
 
-    directionalLight = new DirectionalLight("Directional",0.7,0.5,[0,0,-1],[1,1,1])
+    //directionalLight = new DirectionalLight("Directional",0.5,0.3,[0,0,1],[1,1,1])
+    spotLight = new SpotLight("sun",0.5,0.3,[1,1,1], [0,0,0],[0,0,1])
     var wall = new Drawable(Transformations.gimbalT.XYZ,shapQuad,boxMaterial)
     var wall2 = new Drawable(Transformations.gimbalT.XYZ,teaPot,boxMaterial)
     var wall3 = new Drawable(Transformations.gimbalT.XYZ,shapeCube,boxMaterial)
+    wall.wRotateX(gradToRad(90))
+    wall.scale([100,100,100])
+    wall2.translate([5,0,0])
     //wall2.scale([30,1,30])
     //wall2.wRotateZ(90)
     //wall2.lRotateGamma(90)
@@ -54,9 +58,10 @@ function createScene(shader){
     //wall.scale([0.01,0.01,0.01])
     //wall.scale([0.01,0.01,0.01])
     wall4 = aaa.addSon(wall2)
+    wall4.attachLight(spotLight)
     bbb = new sceneNode(wall)
     //wall.translate([0,0,0])
-    wall.scale([100,100,100])
+    //wall.scale([3,3,3])
 
     //wall2.scale([1,1,1])
    // aaa.calcSceneDraw(scemoShader)
@@ -65,7 +70,8 @@ function createScene(shader){
 
 
     //node.drawab.lRotateAlpha(80)
-
+    SpotLight.bindLights(shader)
+    SpotLight.loadLights(shader)
     PointLight.bindLights(shader)
     PointLight.loadLights(shader)
     DirectionalLight.bindLights(shader)
@@ -82,7 +88,7 @@ function drawEl(){
     //wallW2.drawab.lRotateGamma(1)
     //wallW2.calcSceneDraw(scemoShader)
     //oof.drawab.lRotateGamma(0.007)
-    wall4.drawab.translate([0.01,0,0])
+    wall4.drawab.translate([0,0,0.01])
     wall4.calcSceneDraw(scemoShader)
     bbb.calcSceneDraw(scemoShader)
     //oof.calcSceneDraw(scemoShader)
