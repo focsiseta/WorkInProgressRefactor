@@ -33,8 +33,8 @@ class DirectionalLight extends Light{
         DirectionalLight.counter++
     }
     getDirection(){
-        var updatedMatrix = this.getTransformation()
-        this.direction = [updatedMatrix[8],updatedMatrix[9],updatedMatrix[10]]
+        //var updatedMatrix = this.getTransformation()
+        //this.direction = [updatedMatrix[8],updatedMatrix[9],updatedMatrix[10]]
         return this.direction
     }
     static getLightCounter(){
@@ -243,14 +243,17 @@ class SpotLight extends Light{
         return Math.cos(gradToRad(this.cutoffAngle))
     }
     getDirection(){
-        //this.updateDirection()
+        this.updateDirection()
         return this.direction
     }
     updatePosition(){
         this.position = glMatrix.vec3.transformMat4(this.position,this.defaultPosition,this.frame)
     }
     updateDirection(){
-        this.direction =  glMatrix.vec3.transformMat4(this.direction,this.defaultDirection,this.getRotation())
+        var matrix = this.getFrame()
+        //forward vector
+        this.direction =  [matrix[8],matrix[9],matrix[10]]
+        //glMatrix.vec3.normalize(this.direction,this.direction)
 
     }
     static updateLights(shader){

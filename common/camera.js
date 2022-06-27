@@ -28,7 +28,16 @@ class Camera extends Transformations{
     }
 
     getCameraPosition(){
-        return [this.translationMatrix[12],this.translationMatrix[13],this.translationMatrix[14]]
+        var matrix = this.getViewMatrix()
+        return [matrix[12],matrix[13],matrix[14]]
+    }
+    getCameraDirection(){
+        var matrix = this.getViewMatrix()
+        //d vector
+        return [matrix[8],matrix[9],matrix[10]]
+        //glMatrix.vec3.normalize(this.direction,this.direction)
+
+
     }
 
     processInput(inputHandler) {

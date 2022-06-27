@@ -43,10 +43,11 @@ class Transformations {
             this.transformationMatrix = glMatrix.mat4.mul(this.transformationMatrix,this.translationMatrix,this.scaleMatrix)
             //(T * S) = T * S * R
             glMatrix.mat4.mul(this.transformationMatrix,this.transformationMatrix,this.rotationMatrix)
-            /******** Inverse Transpose **************/
-            glMatrix.mat4.transpose(this.inverseTransposeMatrix,glMatrix.mat4.invert(this.inverseTransposeMatrix,this.transformationMatrix))
-            /******** object frame **************/
+             /******** object frame **************/
             glMatrix.mat4.mul(this.frame,this.fMatrix,this.transformationMatrix)
+            /******** Inverse Transpose **************/
+            glMatrix.mat4.transpose(this.inverseTransposeMatrix,glMatrix.mat4.invert(this.inverseTransposeMatrix,this.frame))
+
         }
     }
     //this method is for keeping normal consistency in the shaders. If we have to draw an object with normals, we also need the inverse transposed transf matrix
