@@ -173,7 +173,7 @@ const fsShaderBase  = `
             vec3 viewDirection = normalize(cameraPosition - fragCoord);
             //Half way vector
             vec3 H = normalize(-light.direction + viewDirection);
-            vec4 specularColor = pow(max(0.1,dot(normalizedNormal,H)), 64.)  * texture2D(uDiffuseColor,vTextureCoord) * vec4(light.color,1.0);
+            vec4 specularColor = pow(max(0.1,dot(normalizedNormal,H)), 25.)  * texture2D(uDiffuseColor,vTextureCoord) * vec4(light.color,1.0);
             light.ambient = ambientColor;
             light.diffuse = diffuseColor;
             light.specular = specularColor;
