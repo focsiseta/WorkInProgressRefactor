@@ -11,6 +11,7 @@ class Camera extends Transformations{
     }
 // method for passing the inverted viewFrame to the shader
     getViewMatrix(){
+        this.update()
         var tmp = glMatrix.mat4.create()
         glMatrix.mat4.mul(tmp,this.translationMatrix,this.rotationMatrix)
         glMatrix.mat4.invert(tmp,tmp)
@@ -28,11 +29,11 @@ class Camera extends Transformations{
     }
 
     getCameraPosition(){
-        var matrix = this.getViewMatrix()
+        var matrix = this.frame
         return [matrix[12],matrix[13],matrix[14]]
     }
     getCameraDirection(){
-        var matrix = this.getViewMatrix()
+        var matrix = this.frame
         //d vector
         return [matrix[8],matrix[9],matrix[10]]
         //glMatrix.vec3.normalize(this.direction,this.direction)

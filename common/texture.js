@@ -15,6 +15,8 @@ class Texture{
         var textureBuffer = context.createTexture()
         var thisTexture = context.TEXTURE0+Texture.textureCounter
         //context.activeTexture(thisTexture)
+
+        //context.activeTexture(thisTexture)
         const image = new Image()
         image.onload = function(){
             context.bindTexture(context.TEXTURE_2D,textureBuffer)

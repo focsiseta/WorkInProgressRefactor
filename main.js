@@ -1,15 +1,16 @@
 const handler = new Input()
-const scemoShader = new Shader(gl,vsShaderBaseline,fsShaderBase)
+const scemoShader = new Shader(gl,vsShaderBaseline,fsShaderBase,"normalShader")
+const outliningShader = new Shader(gl,vsOutline,fsOutline,"outlineShader")
 const shapeCube = new Element("cube",
     cube.vertices[0].values,
-    cube.vertices[2].values,
+    cube.vertices[0].values,
     cube.connectivity[0].indices,
     cube.vertices[2].values,Element.ElementType.SHAPE,"TRIANGLES")
 const shapeCrate = new Element("crate",crateWTexture.vertices[0].values,
     crateWTexture.vertices[1].values,crateWTexture.connectivity[0].indices,crateWTexture.vertices[3].values,Element.ElementType.SHAPE,"TRIANGLES")
 const shapeSphere = new Element("sphere",sphere.vertices[0].values, sphere.vertices[1].values,sphere.connectivity[0].indices,generateTexCoords(sphere.vertices[0].values.length),Element.ElementType.SHAPE,"TRIANGLES")
 const shapeQuad = new Element("quad",cube.vertices[0].values,
-    cube.vertices[1].values,
+    cube.vertices[0].values,
     cube.connectivity[0].indices,
     cube.vertices[2].values,Element.ElementType.SHAPE,"TRIANGLES")
 const shapQuad = new Element("rightQuad",[-1, 0, -1, 1, 0, -1, -1, 0, 1, 1, 0, 1],
@@ -17,90 +18,139 @@ const shapQuad = new Element("rightQuad",[-1, 0, -1, 1, 0, -1, -1, 0, 1, 1, 0, 1
     [0, 2, 1, 1, 2, 3],
     [0, 0, 0, 1, 1, 0, 1, 1],Element.ElementType.SHAPE,"TRIANGLES")
 const teaPot = new Element("teapot",teapot.vertices[0].values,teapot.vertices[1].values,teapot.connectivity[0].indices,generateTexCoords(teapot.vertices[0].values.length),Element.ElementType.SHAPE,"TRIANGLES")
-console.log(shapQuad.tangents)
 
-function setup(shader){
-    var camera = new Camera([ 0,0,5])
-    var projMatrix = glMatrix.mat4.create()
-    glMatrix.mat4.perspective(projMatrix,3.14/4,1300/720,0.15,1500)
-    shader.setMatrixUniform("uViewMatrix",camera.getViewMatrix())
-    shader.setMatrixUniform("uProjMatrix",projMatrix)
-    shader.contextSetup()
-    return camera
+function setupContextProjAndCamera(){
+    //per il momento bisogna far cosi'
+    //perche' per il momento il contesto e' uno solo
+    var context = scemoShader.getContext()
+    Texture.loadTexture(scemoShader,"texture/heightmaps/brickheight.jpg")
+    Texture.loadTexture(scemoShader,"texture/bricks.jpg")
+
+    scemoShader.loadElement(shapQuad)
+    scemoShader.loadElement(teaPot)
+    scemoShader.contextSetup(() =>{
+        var GL = scemoShader.getContext()
+        GL.enable(GL.DEPTH_TEST)
+        GL.enable(GL.STENCIL_TEST)
+        GL.clearColor(0,0,0,0.8)
+    })
+    projectionMatrix = glMatrix.mat4.perspective(glMatrix.mat4.create(),3.14/4,1300/720,0.15,200)
+    camera = new Camera([0,1,3])
+}
+function room(){
+    var brickMaterial = new Material("Brick","texture/bricks.jpg","texture/heightmaps/brickheight.jpg")
+    var draw = new Drawable(shapQuad,brickMaterial)
+    //draw.scale([,5,5])
+    var no = new Node(draw)
+    return no
+}
+function teapotNode(){
+    var brickMaterial = new Material("Brick","texture/bricks.jpg","texture/heightmaps/brickheight.jpg")
+    var draw = new Drawable(teaPot,brickMaterial)
+    var no = new Node(draw)
+    return no
+
+}
+function teapotNode2(){
+    var brickMaterial = new Material("Brick","texture/bricks.jpg","texture/heightmaps/brickheight.jpg")
+    var draw = new Drawable(teaPot,brickMaterial)
+    draw.translate([0,0,0])
+    draw.scale([1.01,1.01,1.01])
+    var no = new Node(draw)
+    return no
+
+}
+function room2(){
+    var brickMaterial = new Material("Brick","texture/bricks.jpg","texture/heightmaps/brickheight.jpg")
+    var draw = new Drawable(shapQuad,brickMaterial)
+    draw.scale([1.1,1.1,1.1])
+    draw.translate([0,-1,0])
+    //var directionalLight = new DirectionalLight("lightDir",0.8,0.5,[0,-1,0],[1,1,1])
+    var no = new Node(draw)
+
+    var cursor = no
+
+    return no
 }
 
-function createScene(shader){
-    Texture.loadTexture(shader,"texture/heightmaps/brickheight.jpg")
-    Texture.loadTexture(shader,"texture/bricks.jpg")
-    shader.loadElement(shapeCube)
-    shader.loadElement(shapeCrate)
-    shader.loadElement(shapeSphere)
-    shader.loadElement(shapeQuad)
-    shader.loadElement(shapQuad)
-    shader.loadElement(teaPot)
-    //var randomMaterial = new Material("random","texture/bricks.jpg","texture/heightmaps/brickheight.jpg")
-    var boxMaterial = new Material("Brick","texture/bricks.jpg","texture/heightmaps/brickheight.jpg")
-   // pointLight = new PointLight("pointLight",0.7,0.5,[1,1,1],[0,0,0])
-
-    directionalLight = new DirectionalLight("Directional",0.7,0.4,[0,-1,0],[1,1,1])
-    //otherDirectional = new DirectionalLight("Directional",0.7,0.3,[0,0,1],[1,0,1])
-    //spotLight = new SpotLight("sun",0.7,0.5,[1,1,1], [0,0,0],[0,0,1])
-    var wall = new Drawable(Transformations.gimbalT.XYZ,shapQuad,boxMaterial)
-    var wall2 = new Drawable(Transformations.gimbalT.XYZ,teaPot,boxMaterial)
-    var wall3 = new Drawable(Transformations.gimbalT.XYZ,shapeCube,boxMaterial)
-    wall.lRotateAlpha(gradToRad(90))
-    wall2.translate([0,5,5])
-    //wall2.scale([30,1,30])
-    //wall2.wRotateZ(90)
-    //wall2.lRotateGamma(90)
-    //wall2.translate([0,1,0])
-    var aaa = new sceneNode(null)
-    //wall.scale([0.01,0.01,0.01])
-    //wall.scale([0.01,0.01,0.01])
-    wall4 = aaa.addSon(wall2)
-    //wall4.attachLight(pointLight)
-    bbb = new sceneNode(wall)
-    //wall.translate([0,0,0])
-    wall.scale([100,100,100])
-
-    //wall2.scale([1,1,1])
-   // aaa.calcSceneDraw(scemoShader)
-
-
-
-
-    //node.drawab.lRotateAlpha(80)
-    SpotLight.bindLights(shader)
-    SpotLight.loadLights(shader)
-    PointLight.bindLights(shader)
-    PointLight.loadLights(shader)
-
-    return aaa
-}
-randomCounter = 0
-randomFlag = false
-function drawEl(){
-    cam.processInput(handler)
-    scemoShader.setMatrixUniform("uViewMatrix",cam.getViewMatrix())
-    scemoShader.setVectorUniform('uEyePosition',cam.getCameraPosition())
-    scemoShader.setVectorUniform("uEyeDirection",cam.getCameraDirection())
-    //console.log(cam.getCameraDirection())
-    //wallW2.drawab.lRotateGamma(1)
-    //wallW2.calcSceneDraw(scemoShader)
-    //oof.drawab.lRotateGamma(0.007)
-    //wall4.drawab.translate([0,0,0.04])
-    wall4.drawab.translate([0,0,0.01])
-    //wall4.drawab.translate([0,0,0.01])
-    wall4.calcSceneDraw(scemoShader)
-    bbb.calcSceneDraw(scemoShader)
-    //oof.calcSceneDraw(scemoShader)
+function normalSetUniform(){
+    scemoShader.setMatrixUniform("uProjMatrix",projectionMatrix)
+    scemoShader.setMatrixUniform("uViewMatrix",camera.getViewMatrix())
+    scemoShader.setVectorUniform("uEyePosition",camera.getCameraPosition())
+    //console.log(camera.getCameraPosition())
     DirectionalLight.bindLights(scemoShader)
     DirectionalLight.loadLights(scemoShader)
-    window.requestAnimationFrame(drawEl)
+}
+function useNormalShader(){
+    scemoShader.useProgram(() => {
+        //console.log("here")
+        scemoShader.gl.enableVertexAttribArray(scemoShader["aPosition"])
+        scemoShader.gl.enableVertexAttribArray(scemoShader["aNormal"])
+        scemoShader.gl.enableVertexAttribArray(scemoShader["aTextureCoord"])
+        scemoShader.gl.enableVertexAttribArray(scemoShader["aTangent"])
+    })
+}
+function normalPass(){
+    useNormalShader()
+    camera.processInput(handler)
+    normalSetUniform()
+    return scemoShader
+}
+function outlineSetUniform(){
+    outliningShader.setMatrixUniform("uProjMatrix",projectionMatrix)
+    outliningShader.setMatrixUniform("uViewMatrix",camera.getViewMatrix())
+    outliningShader.setVectorUniform("uEyePosition",camera.getCameraPosition())
+}
+function useOutlineShader(){
+    outliningShader.useProgram(() =>{
+        outliningShader.gl.enableVertexAttribArray(outliningShader["aPosition"])
+        outliningShader.gl.enableVertexAttribArray(outliningShader["aNormal"])
+        outliningShader.gl.enableVertexAttribArray(outliningShader["aTextureCoord"])
+        outliningShader.gl.enableVertexAttribArray(outliningShader["aTangent"])
+    })
+}
+function outlinePass(){
+    var normalShader = normalPass()
+    var GL = outliningShader.getContext()
+    GL.stencilOp(GL.KEEP,GL.KEEP,GL.REPLACE)
+    useOutlineShader()
+    outlineSetUniform()
+    //Impediamo di scrivere nello stencil buffer
+    useNormalShader()
+    GL.stencilMask(0x00)
+    Node.CalcDraw(scena,normalShader)
+    //permetto a tutti i frammenti di essere scritti nello stencil da adesso
+    GL.stencilMask(0xFF)
+    GL.stencilFunc(GL.ALWAYS,1,0xFF)
+    useOutlineShader()
+    GL.disable(GL.DEPTH_TEST)
+    Node.CalcDraw(teapotOutline,outliningShader)
+    GL.stencilFunc(GL.NOTEQUAL,1,0xFF)
+    GL.stencilMask(0x00)
+    GL.enable(GL.DEPTH_TEST)
+    useNormalShader()
+    Node.CalcDraw(teapotKool,normalShader)
+    GL.stencilMask(0xFF)
+    GL.stencilFunc(GL.ALWAYS,0,0xFF)
+
+
 
 }
 
-cam = setup(scemoShader)
-oof = createScene(scemoShader)
-//drawEl()
-window.requestAnimationFrame(drawEl)
+randomCounter = 0
+randomFlag = true
+function drawLoop(){
+    scemoShader.gl.clear(gl.COLOR_BUFFER_BIT,gl.DEPTH_BUFFER_BIT,gl.STENCIL_BUFFER_BIT)
+    outlinePass()
+    window.requestAnimationFrame(drawLoop)
+}
+function main(){
+    setupContextProjAndCamera()
+    directionalLight = new DirectionalLight("lightDir",0.8,0.5,[0,-1,0],[1,1,1])
+    scena = room()
+    scena2 = room2()
+    teapotKool = teapotNode()
+    teapotOutline = teapotNode2()
+    drawLoop()
+}
+main()

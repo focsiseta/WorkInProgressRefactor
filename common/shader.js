@@ -1,11 +1,15 @@
 class Shader {
     static id_last_draw = ""
     static id_last_material = ""
-    constructor(glContext, vsSource, fsSource) {
+    static shader_in_use = ""
+    static shader_counter = 0
+    constructor(glContext, vsSource, fsSource,shader_id = "Shader_"+Shader.shader_counter) {
+        Shader.shader_counter++
         //DEBUGGING
         this.vsLog = ""
         this.fsLog = ""
         this.uniLog = ""
+        this.shader_id = shader_id
 
         this.vsSource = vsSource
         this.fsSource = fsSource
@@ -31,24 +35,26 @@ class Shader {
         let [attributeArray, uniformArray] = Shader.parseShaders(this.vsSource, this.fsSource)
         this.attributes = attributeArray
         this.uniforms = uniformArray
-        this.attributes.forEach((element, index) => {
-            this.bindAttribute(element, index)
-        })
-        this.uniforms.forEach((element) => {
-            this.bindUniform(element)
-        })
-        this.useProgram()
-        //Todo automate
-        this.gl.enableVertexAttribArray(this["aPosition"])
-        this.gl.enableVertexAttribArray(this["aNormal"])
-        this.gl.enableVertexAttribArray(this["aTextureCoord"])
-        this.gl.enableVertexAttribArray(this["aTangent"])
+        if(this.attributes != null){
+            this.attributes.forEach((element, index) => {
+                this.bindAttribute(element, index)
+            })
+        }
+        if(this.uniforms != null){
+            this.uniforms.forEach((element) => {
+                this.bindUniform(element)
+            })
+        }
     }
-    contextSetup(){
-        this.gl.enable(gl.CULL_FACE)
-        this.gl.enable(gl.DEPTH_TEST)
-        this.gl.clearColor(0.0,0.0,0.0,0.8)
-        this.gl.clear(gl.COLOR_BUFFER_BIT,gl.DEPTH_BUFFER_BIT)
+    useProgram(enableVertex_function){
+        this.gl.useProgram(this.program)
+        if(Shader.shader_in_use !== this.shader_id){
+            enableVertex_function()
+            Shader.shader_in_use = this.shader_id
+        }
+    }
+    contextSetup(func_for_gl){
+        func_for_gl()
     }
     drawDrawable(toDraw){
         var context = this.gl
@@ -66,7 +72,6 @@ class Shader {
 
             context.bindBuffer(context.ARRAY_BUFFER,toDraw.shape.tBuffer)
             context.vertexAttribPointer(this["aTangent"],3,context.FLOAT,false,0,0)
-
 
 
             context.bindBuffer(context.ARRAY_BUFFER, toDraw.shape.texCoordBuffer)
@@ -159,7 +164,10 @@ class Shader {
         let unifParser = /(?<=uniform\s\w+\s)\w+(?=;)/g
 
         let attributes = vsSource.match(attrParser)
-        let uniforms = vsSource.match(unifParser).concat(fsSource.match(unifParser))
+        let uniforms = vsSource.match(unifParser)
+        if(uniforms != null){
+            uniforms = uniforms.concat(fsSource.match(unifParser))
+        }
         return [attributes, uniforms]
     }
 
@@ -180,9 +188,6 @@ class Shader {
     }
     getUniformValue(uniformName){
         return this.gl.getUniform(this.program,this[uniformName])
-    }
-    useProgram(){
-        this.gl.useProgram(this.program)
     }
     setUniform1Float(uniformName,data){
         if(!this.hasOwnProperty(uniformName)){

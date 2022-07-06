@@ -77,13 +77,14 @@ class Element {
 }
 
 class Drawable extends Transformations{
-    constructor(gimbalType = Transformations.gimbalT.XYZ,
-                shape = null,material = null) {
-        super(gimbalType)
+    constructor(shape = null,material = null,relativeToDrawable = null) {
+        super(Transformations.gimbalT.XYZ)
         this.shape = shape
         this.material = material
     }
 }
+
+
 
 
 function LazyUVMappingMatrixSetup(element,width,height){

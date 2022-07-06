@@ -67,7 +67,6 @@ const vsShaderBaseline  = `
         void main(void){
             //Point in camera space just in case we need it
             vPositionC =  uM * vec4(aPosition,1.0);
-            vPositionC =  vPositionC / vPositionC.w;
            
             gl_Position = uProjMatrix * uViewMatrix * vPositionC;
             
@@ -98,8 +97,6 @@ const fsShaderBase  = `
         
         //Camera position
         uniform vec3 uEyePosition;
-        //Camera direction
-        uniform vec3 uEyeDirection;
         
         //How many directional lights
         uniform int N_DIRLIGHTS;
@@ -173,46 +170,49 @@ const fsShaderBase  = `
             vec3 viewDirection = normalize(cameraPosition - fragCoord);
             //Half way vector
             vec3 H = normalize(-light.direction + viewDirection);
-            vec4 specularColor = pow(max(0.1,dot(normalizedNormal,H)), 25.)  * texture2D(uDiffuseColor,vTextureCoord) * vec4(light.color,1.0);
+            vec4 specularColor = pow(max(0.1,dot(normalizedNormal,H)), 1.)  * texture2D(uDiffuseColor,vTextureCoord) * vec4(light.color,1.0);
             light.ambient = ambientColor;
             light.diffuse = diffuseColor;
             light.specular = specularColor;
             return light.ambient + light.specular + light.diffuse;
-            //return vec4(light.direction,1.0);
+            //return vec4(normal,1.0);
+            //return vec4(vTextureCoord.x,0.0,vTextureCoord.y,1.0);
+
         }
         vec4 CalcPointLight(PointLight light,vec3 cameraPos,vec3 normal,vec3 fragPos){
             vec3 normalizedNormal = normalize(normal);
-            vec3 rayDirection = normalize(fragPos - light.position);
-            vec3 distanceVector = fragPos - light.position;
+            vec3 rayDirection = normalize(light.position - fragPos);
+            vec3 distanceVector = light.position - fragPos;
             float distance = length(distanceVector);
-            vec3 viewDirection = normalize(fragPos - cameraPos);
+            vec3 viewDirection = normalize(cameraPos - fragPos);
             float attenuationFactor = 1. / (1. + light.Kl * distance + light.Kq * pow(distance,2.));
             vec4 ambientComponent = vec4(light.color * light.ambientInt,1.0) * texture2D(uDiffuseColor,vTextureCoord);
-            vec4 diffuseComponent = vec4(light.color * light.diffuseInt,1.0) * texture2D(uDiffuseColor,vTextureCoord) * max(0.0,dot(normalizedNormal,-rayDirection));
+            vec4 diffuseComponent = vec4(light.color * light.diffuseInt,1.0) * texture2D(uDiffuseColor,vTextureCoord) * max(0.0,dot(normalizedNormal,rayDirection));
             //Half way vector
-            vec3 H = normalize(normalize(rayDirection) + normalize(viewDirection));
-            vec4 specularComponent = pow(max(dot(normalizedNormal,H),0.0),1.) * texture2D(uDiffuseColor,vTextureCoord) * vec4(light.color,1.0);
+            vec3 H = normalize((rayDirection) + (viewDirection));
+            vec4 specularComponent = pow(max(dot(normalizedNormal,H),0.0),25.) * texture2D(uDiffuseColor,vTextureCoord) * vec4(light.color,1.0);
             return (specularComponent + diffuseComponent + ambientComponent) * attenuationFactor;
         }
          vec4 CalcSpotLight(SpotLight light,vec3 cameraPos,vec3 normal,vec3 fragPos){
             //Theta is the cosine between fragpos and light.direction
-            vec3 LightDirection = normalize(-light.direction);
-            float theta = dot(normalize(light.position - fragPos) , LightDirection);
+            vec3 LightDirection = normalize(light.position - fragPos);
+            float theta = dot( normalize(-light.direction), LightDirection);
             vec3 normalizedNormal = normalize(normal);
            
             if(theta < light.cutoff){
                 vec3 distanceVector = light.position - fragPos;
                 float dist = length(distanceVector);
-                vec3 viewDirection = normalize(fragPos - cameraPos);
+                vec3 viewDirection = normalize(cameraPos - fragPos);
                 float attenuation = 1. / (1. + light.Kl * dist + light.Kq * pow(dist,2.));
-                float attenuationFactor = min(attenuation,1.0);
+                float attenuationFactor = max(0.0,min(attenuation,1.0));
                 vec4 ambientComponent = vec4(light.color * light.ambientInt,1.0) * texture2D(uDiffuseColor,vTextureCoord);
                 vec4 diffuseComponent = vec4(light.color * light.diffuseInt,1.0) * texture2D(uDiffuseColor,vTextureCoord) * max(0.0,dot(normalizedNormal,LightDirection));
                 //Half way vector
                 vec3 H = normalize(normalize(LightDirection) + normalize(viewDirection));
-                vec4 specularComponent = pow(max(dot(normalizedNormal,H),0.1),1.) * texture2D(uDiffuseColor,vTextureCoord) * vec4(light.color,1.0);
-                attenuationFactor = attenuationFactor >= 0.01 ? attenuationFactor : 0.0;
+                vec4 specularComponent = pow(max(dot(normalizedNormal,H),0.0),25.) * texture2D(uDiffuseColor,vTextureCoord) * vec4(light.color,1.0);
+                //attenuationFactor = attenuationFactor >= 0.01 ? attenuationFactor : 0.0;
                 return ((specularComponent+ambientComponent+diffuseComponent) * attenuationFactor);
+                //return vec4(normal * attenuationFactor,1.0);
             }
             return vec4(0.0);
         }
@@ -225,7 +225,7 @@ const fsShaderBase  = `
             vec3 normal = texture2D(uNormalMap,vTextureCoord).xyz;
             normal = (normal * 2.0) - vec3(1.0);
             normal = normalize(TBN * normal);
-            vec3 finalNormal = normal.x > 0.0 || normal.y > 0.0 || normal.z > 0.0 ? normal + vNormal : vNormal;
+            vec3 finalNormal = normal.x > 0.0 || normal.y > 0.0 || normal.z > 0.0 ?  normal + vNormal : vNormal;
             for(int i = 0; i < 64; i++){
                 //Height map code
                 if(i < posLightCounter){
@@ -248,8 +248,33 @@ const fsShaderBase  = `
         }
         
 `
+const vsOutline = `
+        //vertex
+        attribute vec3 aPosition;
+        //normals
+        attribute vec3 aNormal;
+        //texture
+        attribute vec2 aTextureCoord;
+        //tangent
+        attribute vec3 aTangent;
+        //bitangent
+        attribute vec3 aBitangent;
+        
+        uniform mat4 uInvTransGeoMatrix;
+        uniform mat4 uM;
+        uniform mat4 uViewMatrix;
+        uniform mat4 uProjMatrix;
+    void main(){
+        gl_Position = uProjMatrix * uViewMatrix * uM * vec4(aPosition,1.0);
+    }
 
-
+`
+const fsOutline = `
+            precision highp float;
+            void main(){
+                gl_FragColor = vec4(1.0,0.0,1.0,1.0);
+            }
+`
 
 //const phongLight = new Program(gl,vsPhongSource,fsPhongSource)
 

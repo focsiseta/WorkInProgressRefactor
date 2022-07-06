@@ -34,11 +34,14 @@ class Transformations {
         this.fMatrix = glMatrix.mat4.create()
 
     }
+    applyReferenceSpace(space){
+        glMatrix.mat4.mul(this.fMatrix,space,this.fMatrix)
+    }
     update(){
         //todo
         //Still does some unwanted math, but I have other stuff to write rn
         if(this.dirty){
-            //console.log("Doing math...")
+            console.log("Doing math...")
             this.dirty = false
             this.transformationMatrix = glMatrix.mat4.mul(this.transformationMatrix,this.translationMatrix,this.scaleMatrix)
             //(T * S) = T * S * R
@@ -52,7 +55,6 @@ class Transformations {
     }
     //this method is for keeping normal consistency in the shaders. If we have to draw an object with normals, we also need the inverse transposed transf matrix
     getInverseTranspose(){
-        this.update()
         return this.inverseTransposeMatrix
     }
     rotationCalc(){
@@ -142,25 +144,27 @@ class Transformations {
         glMatrix.mat4.scale(this.scaleMatrix,this.scaleMatrix,scaleVector)
     }
     getFrame(){
-        this.update()
+        //this.update()
         return this.frame
     }
     getTransformation(){
-        this.update()
+        //this.update()
         return this.transformationMatrix
     }
     getTranslation(){
-        this.update()
+        //this.update()
         return this.translationMatrix
     }
     getRotation(){
-        this.update()
+        //this.update()
         return this.rotationMatrix
     }
     setFatherFrame(frame){
         this.dirty = true
         glMatrix.mat4.copy(this.fMatrix,frame)
-        this.update()
+    }
+    getFatherFrame(){
+        return this.fMatrix
     }
     setDirty(boolean){
         this.dirty = boolean

@@ -29,12 +29,16 @@ class DirectionalLight extends Light{
     constructor(name = "Directional_" + DirectionalLight.counter,diffuseInt,ambientInt,direction,color) {
         super(name,diffuseInt,ambientInt,color)
         this.direction = direction
+        this.defaultDirection = direction
         DirectionalLight.lightKeeper.push(this)
         DirectionalLight.counter++
     }
     getDirection(){
-        //var updatedMatrix = this.getTransformation()
-        //this.direction = [updatedMatrix[8],updatedMatrix[9],updatedMatrix[10]]
+        this.update()
+        var updatedMatrix = this.getFrame()
+        this.direction = [updatedMatrix[8],updatedMatrix[9],updatedMatrix[10]]
+//        this.direction = glMatrix.vec3.transformMat4(glMatrix.vec3.create(),this.defaultDirection,this.getTransformation())
+        //console.log(this.direction)
         return this.direction
     }
     static getLightCounter(){
@@ -145,6 +149,7 @@ class PointLight extends Light{
         }
     }
     updateLight(shader){
+        this.update()
         shader.setVectorUniform(this.uniformID + ".position",this.getPosition())
     }
 
@@ -181,7 +186,6 @@ class SpotLight extends Light{
     }
     static bindLights(shader){
         shader.setUniform1Int("N_SPOTLIGHTS",SpotLight.counter)
-        console.log(SpotLight.counter)
         for(let i = 0;i < SpotLight.counter;i++) {
             shader.bindUniform("spotLightArray[" + i + "].diffuseInt")
             shader.bindUniform("spotLightArray[" + i + "].ambientInt")
@@ -247,17 +251,26 @@ class SpotLight extends Light{
         return this.direction
     }
     updatePosition(){
-        this.position = glMatrix.vec3.transformMat4(this.position,this.defaultPosition,this.frame)
+        this.position = glMatrix.vec3.transformMat4(this.position,this.defaultPosition,this.getTranslation())
     }
     updateDirection(){
-        var matrix = this.getFrame()
-        //forward vector
-        this.direction =  [matrix[8],matrix[9],matrix[10]]
+        //var matrix = this.getFatherFrame()
+        //SpotLight.deltaDirection = glMatrix.vec3.subtract(SpotLight.deltaDirection,this.direction,this.defaultDirection)
+        this.update()
+//        this.direction = glMatrix.vec3.transformMat4(this.direction,this.defaultDirection,this.getTransformation())
         //glMatrix.vec3.normalize(this.direction,this.direction)
+        //console.log(this.direction)
+        //console.log(this.frame)
+        var matrix = this.getFrame()
+        this.direction = [matrix[8],matrix[9],matrix[10]]
+        //glMatrix.vec3.normalize(this.direction,this.direction)
+        //console.log(this.direction)
+
 
     }
     static updateLights(shader){
         for(let i = 0;i < SpotLight.counter;i++) {
+            SpotLight.lightKeeper[i].update()
             shader.setUniform1Float("spotLightArray[" + i + "].cutoff",this.lightKeeper[i].getCutoff())
             shader.setVectorUniform("spotLightArray[" + i + "].position",SpotLight.lightKeeper[i].getPosition())
             shader.setVectorUniform("spotLightArray[" + i + "].direction",SpotLight.lightKeeper[i].getDirection())
@@ -265,6 +278,7 @@ class SpotLight extends Light{
         }
     }
     updateLight(shader){
+        this.update()
         shader.setUniform1Float(this.uniformID + ".cutoff",this.getCutoff())
         shader.setVectorUniform(this.uniformID + ".position",this.getPosition())
         shader.setVectorUniform(this.uniformID + ".direction",this.getDirection())
