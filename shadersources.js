@@ -251,16 +251,6 @@ const fsShaderBase  = `
 const vsOutline = `
         //vertex
         attribute vec3 aPosition;
-        //normals
-        attribute vec3 aNormal;
-        //texture
-        attribute vec2 aTextureCoord;
-        //tangent
-        attribute vec3 aTangent;
-        //bitangent
-        attribute vec3 aBitangent;
-        
-        uniform mat4 uInvTransGeoMatrix;
         uniform mat4 uM;
         uniform mat4 uViewMatrix;
         uniform mat4 uProjMatrix;
