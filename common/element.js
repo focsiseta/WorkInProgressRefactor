@@ -1,13 +1,20 @@
 //Class that will act as a container for all the type of buffers
 class Element {
+    static ElementType = {
+        LIGHT : 0,
+        SHAPE : 1,
+}
 
-    constructor(id,vertexArray,normalArray,indexArray,texCoordArray,drawType = "TRIANGLES",) {
+    constructor(
+                id,vertexArray,normalArray,indexArray,texCoordArray,elementType = Element.ElementType.SHAPE,drawType = "TRIANGLES",) {
+
         this.vertices = new Float32Array(vertexArray)
         this.normals = new Float32Array(normalArray)
         this.indices = new Uint16Array(indexArray)
         this.texCoords = new Float32Array(texCoordArray)
         this.tangents = []
         this.calculateTBN()
+        this.elementType = elementType
         this.drawType = drawType
         this.id = id
     }

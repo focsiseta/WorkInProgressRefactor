@@ -3,14 +3,13 @@ class Shader {
     static id_last_material = ""
     static shader_in_use = ""
     static shader_counter = 0
-constructor(glContext, vsSource, fsSource,shader_id = "Shader_"+Shader.shader_counter) {
+    constructor(glContext, vsSource, fsSource,shader_id = "Shader_"+Shader.shader_counter) {
         Shader.shader_counter++
         //DEBUGGING
         this.vsLog = ""
         this.fsLog = ""
         this.uniLog = ""
         this.shader_id = shader_id
-        this.binding_funcion = null
 
         this.vsSource = vsSource
         this.fsSource = fsSource
@@ -65,22 +64,18 @@ constructor(glContext, vsSource, fsSource,shader_id = "Shader_"+Shader.shader_co
             Shader.id_last_material = toDraw.material.getId()
         }
         if(!(Shader.id_last_draw === toDraw.shape.id)) {
-            if(this.attributes.includes("aPosition")){
-                context.bindBuffer(context.ARRAY_BUFFER, toDraw.shape.vBuffer)
-                context.vertexAttribPointer(this["aPosition"],3,context.FLOAT,false,0,0)
-            }
-            if(this.attributes.includes("aNormal")){
-                context.bindBuffer(context.ARRAY_BUFFER, toDraw.shape.nBuffer)
-                context.vertexAttribPointer(this["aNormal"],3,context.FLOAT,false,0,0)
-            }
-            if(this.attributes.includes("aTangent")){
-                context.bindBuffer(context.ARRAY_BUFFER,toDraw.shape.tBuffer)
-                context.vertexAttribPointer(this["aTangent"],3,context.FLOAT,false,0,0)
-            }
-            if(this.attributes.includes("aTextureCoord")){
-                context.bindBuffer(context.ARRAY_BUFFER, toDraw.shape.texCoordBuffer)
-                context.vertexAttribPointer(this["aTextureCoord"],2,context.FLOAT,false,0,0)
-            }
+            context.bindBuffer(context.ARRAY_BUFFER, toDraw.shape.vBuffer)
+            context.vertexAttribPointer(this["aPosition"],3,context.FLOAT,false,0,0)
+
+            context.bindBuffer(context.ARRAY_BUFFER, toDraw.shape.nBuffer)
+            context.vertexAttribPointer(this["aNormal"],3,context.FLOAT,false,0,0)
+
+            context.bindBuffer(context.ARRAY_BUFFER,toDraw.shape.tBuffer)
+            context.vertexAttribPointer(this["aTangent"],3,context.FLOAT,false,0,0)
+
+
+            context.bindBuffer(context.ARRAY_BUFFER, toDraw.shape.texCoordBuffer)
+            context.vertexAttribPointer(this["aTextureCoord"],2,context.FLOAT,false,0,0)
             context.bindBuffer(context.ELEMENT_ARRAY_BUFFER,toDraw.shape.iBuffer)
 
             Shader.id_last_draw = toDraw.shape.id
@@ -88,13 +83,7 @@ constructor(glContext, vsSource, fsSource,shader_id = "Shader_"+Shader.shader_co
         this.setMatrixUniform("uM",toDraw.frame)
         context.uniformMatrix4fv(this['uInvTransGeoMatrix'],false,toDraw.inverseTransposeMatrix)
         context.drawElements(context[toDraw.shape.drawType],toDraw.shape.indices.length,context.UNSIGNED_SHORT,0)
-        //console.log(toDraw)
 
-    }
-    setBindingFunction(binding_function){
-        if(binding_function != null){
-            this.binding_funcion = binding_function
-        }
     }
     loadElement(toLoad){
         var context = this.gl
