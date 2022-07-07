@@ -64,7 +64,7 @@ constructor(glContext, vsSource, fsSource,shader_id = "Shader_"+Shader.shader_co
             toDraw.material.activateMaterial(this)
             Shader.id_last_material = toDraw.material.getId()
         }
-        if(!(Shader.id_last_draw === toDraw.shape.id)) {
+        if(!(Shader.id_last_draw === toDraw.shape.id)){
             if(this.attributes.includes("aPosition")){
                 context.bindBuffer(context.ARRAY_BUFFER, toDraw.shape.vBuffer)
                 context.vertexAttribPointer(this["aPosition"],3,context.FLOAT,false,0,0)
