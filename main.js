@@ -1,23 +1,11 @@
 const handler = new Input()
 const scemoShader = new Shader(gl,vsShaderBaseline,fsShaderBase,"normalShader")
 const outliningShader = new Shader(gl,vsOutline,fsOutline,"outlineShader")
-const shapeCube = new Element("cube",
-    cube.vertices[0].values,
-    cube.vertices[0].values,
-    cube.connectivity[0].indices,
-    cube.vertices[2].values,"TRIANGLES")
-const shapeCrate = new Element("crate",crateWTexture.vertices[0].values,
-    crateWTexture.vertices[1].values,crateWTexture.connectivity[0].indices,crateWTexture.vertices[3].values,Element.ElementType.SHAPE,"TRIANGLES")
-const shapeSphere = new Element("sphere",sphere.vertices[0].values, sphere.vertices[1].values,sphere.connectivity[0].indices,generateTexCoords(sphere.vertices[0].values.length),Element.ElementType.SHAPE,"TRIANGLES")
-const shapeQuad = new Element("quad",cube.vertices[0].values,
-    cube.vertices[0].values,
-    cube.connectivity[0].indices,
-    cube.vertices[2].values,Element.ElementType.SHAPE,"TRIANGLES")
 const shapQuad = new Element("rightQuad",[-1, 0, -1, 1, 0, -1, -1, 0, 1, 1, 0, 1],
     [0,1,0,0,1,0,0,1,0,0,1,0],
     [0, 2, 1, 1, 2, 3],
-    [0, 0, 0, 1, 1, 0, 1, 1],Element.ElementType.SHAPE,"TRIANGLES")
-const teaPot = new Element("teapot",teapot.vertices[0].values,teapot.vertices[1].values,teapot.connectivity[0].indices,generateTexCoords(teapot.vertices[0].values.length),Element.ElementType.SHAPE,"TRIANGLES")
+    [0, 0, 0, 1, 1, 0, 1, 1],"TRIANGLES")
+const teaPot = new Element("teapot",teapot.vertices[0].values,teapot.vertices[1].values,teapot.connectivity[0].indices,generateTexCoords(teapot.vertices[0].values.length),"TRIANGLES")
 
 function setupContextProjAndCamera(){
     //per il momento bisogna far cosi'
